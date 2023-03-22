@@ -1,0 +1,334 @@
+import pandas as pd
+import numpy as np
+
+
+
+week1 = pd.read_csv('C:/Users/fun-f/Desktop/analysis/data_folder/全店.csv',encoding='cp932')#今週実績
+week1_sales_values = pd.read_csv('C:/Users/fun-f/Desktop/analysis/sales_values/売上実績4.csv',encoding='cp932')#今週売上集計
+
+
+previous_week1 = pd.read_csv("C:/Users/fun-f/Desktop/analysis/previous_data/全店1.csv",encoding='cp932')#過去実績今週
+previous_week1_sales_values = pd.read_csv('C:/Users/fun-f/Desktop/analysis/sales_values/売上実績1.csv',encoding='cp932')#前週売上集計
+
+previous_week2 = pd.read_csv("C:/Users/fun-f/Desktop/analysis/previous_data/全店2.csv",encoding='cp932')#過去実績翌週
+previous_week2_sales_values = pd.read_csv('C:/Users/fun-f/Desktop/analysis/sales_values/売上実績2.csv',encoding='cp932')#今週売上集計
+
+previous_week3 = pd.read_csv("C:/Users/fun-f/Desktop/analysis/previous_data/全店3.csv",encoding='cp932')#過去実績翌週
+previous_week3_sales_values = pd.read_csv('C:/Users/fun-f/Desktop/analysis/sales_values/売上実績3.csv',encoding='cp932')#来週売上集計
+
+
+customer_data = pd.read_csv('C:/Users/fun-f/Desktop/analysis/data_folder/全店顧客データ.csv',encoding='cp932')#今週実績
+
+
+#用途別ＣＤ
+division_CD = {
+  "01":"OP/SETUP",                                                                                            
+  "02":"羽織",
+  "03":"羽織",
+  "04":"TOPs",
+  "05":"TOPs",
+  "06":"羽織",
+  "07":"TOPs",
+  "08":"BOTTOMs",
+  "09":"BOTTOMs",
+  "10":"TOPs",
+  "11":"INN",
+  "12":"OP/SETUP",
+  "13":"ACC",
+  "15":"SH",
+  
+}
+
+
+
+item_cd_list = {
+  "OP":"01",                                                                                            
+  "CD":"02",
+  "JK":"03",
+  "KT":"04",
+  "CS":"05",
+  "CT":"06",
+  "BL":"07",
+  "SK":"08",
+  "PT":"09",
+  "TR":"10",
+  "INN":"11",
+  "SETUP":"12",
+  "ACC":"13",
+  "SH":"15",
+}                         
+
+class model():
+  
+  #商品データ
+  class basket():
+    
+    def __init__(self,slip_number,unit,at):
+
+      self.slip_number = slip_number #伝票番号
+      self.unit = unit# 買上点数
+      self.at = at #客単価
+      
+    Item_List = [] 
+      
+    def item(self,product_cd,item_name,item_cd,division_cd,quantity):#初期化
+      self.item_name = item_name #商品名
+      self.product_cd = product_cd #商品CD
+      self.item_cd = item_cd #アイテムCD
+      self.division_cd = division_cd #用途区分
+      self.quantity = quantity #点数
+      #self.price = price #金額
+  
+
+
+path_1 = 'C:/Users/fun-f/Desktop/analysis/data_folder/'
+path_2 = 'C:/Users/fun-f/Desktop/analysis/'#保存先
+#range_ = 0
+
+
+
+
+df_customer_data = pd.DataFrame(customer_data)
+
+df_week1 = pd.DataFrame(week1)#前週実績
+df_week1_sales_values = pd.DataFrame(week1_sales_values)
+
+#======================================
+#★★★★★★★★★★★★★★★★★★★★★★★★★
+
+#--------------------------------------------------------------------------------------------------------------------
+#顧客販売データを処理
+order_n = pd.DataFrame(df_customer_data["伝票番号"],columns=["伝票番号"])
+
+#ユニーク伝票CD
+uni_order_n = np.unique(order_n)
+
+item_cd = pd.DataFrame(df_customer_data["商品コード"].astype('str').str.zfill(10).str[:10].values,columns=["商品CD"])
+item_name = pd.DataFrame(df_customer_data["商品名"],columns=["商品名"])
+category_cd = pd.DataFrame(df_customer_data["商品コード"].astype('str').str.zfill(10).str[2:4].values,columns=["アイテムCD"])
+quantity = pd.DataFrame(df_customer_data["数量"].values,columns=["数量"])#伝票明細数量
+amount = pd.DataFrame(df_customer_data["小計金額"].values,columns=["金額"])#伝票明細小計金額
+
+set_data = pd.concat([order_n,item_cd,item_name,category_cd,quantity,amount],axis=1)
+#購入データ
+  
+#filter_data = set_data[set_data["金額"] >= 100]
+
+filter_1 = set_data[set_data["アイテムCD"] != "98"] #ショッパー除外
+
+filter_2 = filter_1[filter_1["アイテムCD"] != "14"] #サンプル除外
+
+filter_data = filter_2[filter_2["商品名"] != "ｷﾚｲﾏｽｸ"] #マスク除外
+
+for i in uni_order_n:
+  key_data = filter_data[filter_data["伝票番号"] == i]#伝票番番号に一致するデータを抽出
+  data_at = sum(key_data["金額"].values)
+  data_count = len(key_data)#買上数をカウント
+  model.basket(i,data_count,data_at)
+  
+  for i_2,n in zip(key_data.values,range(1,data_count + 1 )):
+    print(i_2)
+    
+    
+    # item = model().basket.item(
+    #   self="",
+    #   product_cd = i_2[1],
+    #   item_name=i_2[2],
+    #   item_cd=i_2[3],
+    #   division_cd=division_CD[i_2[3]],
+    #   quantity=i_2[4],
+    #   #i_2[5],
+    #   )
+    
+    #model.basket.Item_List.append(item)
+  
+#★★★
+for i_3 in uni_order_n:
+  print(model.basket)
+#除外後顧客データ
+#ショッパー抜き顧客買上データ
+
+print(filter_data)
+noc = sum(df_week1_sales_values["売上客数"].values)#売上客数
+
+#全店実績
+#===================================================================================================================================================
+
+item_cd = pd.DataFrame(df_week1["商品コード"].astype('str').str.zfill(10).values,columns=["商品CD"])
+item_name = pd.DataFrame(df_week1["商品名"].values,columns=["商品名"])
+category_cd = pd.DataFrame(df_week1["商品コード"].astype('str').str.zfill(10).str[2:4].values,columns=["アイテムCD"])
+quantity = pd.DataFrame(df_week1['合計数量'].values,columns=["数量"])
+amount = pd.DataFrame(df_week1['合計金額'].values,columns=["金額"])
+
+
+df_week1_values = pd.concat([item_cd,item_name,category_cd,quantity,amount],axis=1)
+
+filter1_df_week1_values = df_week1_values[df_week1_values["アイテムCD"] != "98" ]
+
+filter2_df_week1_values = filter1_df_week1_values[(filter1_df_week1_values["商品名"] != "ｷﾚｲﾏｽｸ") & (filter1_df_week1_values["商品名"] != "ｻﾝﾌﾟﾙ") ]
+
+
+all_amount = sum(filter2_df_week1_values["金額"].values)
+
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+#アイテム別全店実績ランキング５位
+#改善アイテムに一致するアイテムCDの全店実績
+weak_elements1 ="03"
+
+rank_data1 = filter2_df_week1_values[filter2_df_week1_values["アイテムCD"] == weak_elements1].sort_values("金額",ascending=False).head(5)#★★★
+
+list_count = len(rank_data1["商品名"].values)
+print(list_count)
+print(rank_data1)
+
+
+#=================================================================
+#ランキング1位の商品をピックアップ
+rank_1 = rank_data1["商品名"].values[0]
+print(rank_1)
+
+#==========================================================================================================================================
+#店別データ
+# shop_item_values1 = filter2_df_shop_rank_data_values2[filter2_df_shop_rank_data_values2["商品名"] == rank_1]#アイテムが一致するデータリストを作成
+# ranking_1_shop_values = shop_item_values1["数量"].values#★ランキング実績上位５品番の店別実績を出力
+#==========================================================================================================================================
+
+
+#全店データ
+macth_data1 = filter_data[filter_data["商品名"] == rank_1]
+
+order_no1 = np.unique(macth_data1["伝票番号"].values)
+
+
+quantity_data1 = len(order_no1)#販売点数
+
+
+#-------------------------------------------------------------------
+        
+list1_1 = []
+set_content = []#SETアイテム数格納リスト
+single_content = []#\単品購入数格納リスト
+for order_x in order_no1:
+  
+  datas = filter_data[filter_data["伝票番号"] == order_x]  
+  datas_content = datas["伝票番号"].count()#SET内包数
+  #print("SET内包数",datas_content)
+  
+  if datas_content > 1 :
+    set_content.append(datas_content)
+    #内包データが１点より多い場合格納
+    
+  elif   datas_content == 1:
+    single_content.append(datas_content)
+  
+  
+  if len(datas) > 1 :
+    
+    for datas_contents in datas.values:
+      
+      #shop_item_values = filter2_df_shop_rank_data_values2[filter2_df_shop_rank_data_values2["商品名"] == datas_contents[2]]
+      #print(shop_item_values["数量"].values)
+      
+      df_datas_contents = pd.DataFrame({
+        "伝票番号":[datas_contents[0]],
+        "商品CD":datas_contents[1],
+        "商品名":datas_contents[2],
+        "アイテムCD":datas_contents[3],
+        "数量":datas_contents[4],
+        "金額":datas_contents[5],
+        
+        })
+      
+      list1_1.append(df_datas_contents)
+      #print(datas_contents)
+      
+all_quantity = rank_data1.values[0][3]
+set_quantity = len(set_content)
+single_quantity = len(single_content)
+print(set_content)
+print("総売れ点数",all_quantity,"SET販売数",set_quantity,"単品販売数",single_quantity)
+
+
+
+list1_1_concat_1 = pd.concat(list1_1)  
+
+print("顧客データ",list1_1_concat_1)
+list1_1_concat_2 = list1_1_concat_1[list1_1_concat_1["商品名"] != rank_1]
+#ランキングアイテム以外の商品リスト
+
+#===========================================================
+#★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+counts = list1_1_concat_2["商品名"].value_counts().head(20)
+#組み合わせの最頻値ベスト20品番
+print(counts)
+
+#★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+#===========================================================
+
+list1_2 = []
+for a,b in zip(counts.index,counts):
+  print(a,b)
+  
+  mac_element = list1_1_concat_2[list1_1_concat_2["商品名"] == a ]
+  
+  
+  #アイテムCDを取得
+  mac_element_2 = mac_element["アイテムCD"].values[0]
+  
+  #商品CDを取得
+  mac_element_3 = mac_element["商品CD"].values[0]
+
+  ranking_datas = pd.DataFrame({
+
+        "商品CD":[mac_element_3],
+        "商品名":[a],
+        "アイテムCD":[mac_element_2],
+        "数量":[b],
+        #"SET販売構成比":[],
+        #"金額":datas_contents[5]
+        })
+  
+  list1_2.append(ranking_datas)
+  
+list1_2_concat = pd.concat(list1_2)#SET実績ベスト５を作成
+print(list1_2_concat)
+
+item_CD_list = np.unique(list1_2_concat["アイテムCD"])
+
+division_List = []
+
+print("客数",noc)
+
+for h_CD in item_CD_list:
+  mode_CD = list1_2_concat["アイテムCD"].mode()[0]#最頻値
+  count_mode_CD = list1_2_concat["アイテムCD"].mode().count()
+  
+  select_CD = list1_2_concat[list1_2_concat["アイテムCD"].values == h_CD ]
+
+  
+  division_data = pd.DataFrame({"用途区分":division_CD[str(h_CD)],"数量":select_CD["数量"].values})
+  
+  division_List.append(division_data)
+  
+division_List_concat = pd.concat(division_List)  
+  
+print(division_List_concat)  
+  
+  
+division_unq_list = set(division_List_concat["用途区分"])
+
+#総SET数
+all_division_quantity =  sum(pd.concat(division_List)["数量"].values)
+
+division_List2 = []
+for key_div in division_unq_list:
+  select_data2 = division_List_concat[division_List_concat["用途区分"] == key_div ]
+  quantity_data = sum(select_data2["数量"].values)
+  set_ratio = "{: .1f}".format((quantity_data/all_division_quantity)*100)
+  division_data2 = pd.DataFrame({"用途区分":[key_div],"数量":[quantity_data],"構成比":[set_ratio]})
+  division_List2.append(division_data2)
+  
+division_List2_concat = pd.concat(division_List2).sort_values("数量",ascending=False)
+
+
