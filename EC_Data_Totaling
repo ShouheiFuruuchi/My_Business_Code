@@ -1,0 +1,272 @@
+import selenium
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import openpyxl as pyxl
+import pandas as pd
+import shutil
+from operator import itemgetter
+import os
+import numpy as np
+import datetime
+from datetime import timedelta
+
+import time
+import math
+
+#置き換えリスト
+ReDataList = "C:/Users/fun-f/Downloads/SHOPLIST品番置換え.xlsx"
+r_ReDataList = pd.read_excel(ReDataList)
+
+df_ReDataList = pd.DataFrame(r_ReDataList)
+
+dr_files = 'C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA'
+dr_read = os.listdir(dr_files)
+
+print(dr_read)
+
+print("ファイルを削除")
+for file_name in dr_read:
+  del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+  os.remove(del_f_path)#dataf内のファイルの削除
+
+
+
+driver = webdriver.Chrome("C:/Users/fun-f/chromedriver.exe")
+
+url = 'https://service.shop-list.com/shopadmin/'
+
+driver.get(url)
+
+tenant_cd = 'fun'
+id = '17a449c4'
+password = 'fun99999'
+setting_day1 = '2021/09/01'
+
+driver.find_element_by_xpath('//*[@id="input_shopcode"]').send_keys(tenant_cd)
+
+driver.find_element_by_xpath('//*[@id="input_id"]').send_keys(id)
+
+driver.find_element_by_xpath('//*[@id="input_pass"]').send_keys(password)
+
+driver.find_element_by_xpath('//*[@id="main"]/section/form/a').click()
+
+time.sleep(2)
+
+#商品データダウンロード
+#実行無し
+def item_data():
+  driver.get("https://service.shop-list.com/shopadmin/csv/ProductCsvDlTop/")
+
+  driver.find_element_by_xpath('//*[@id="main"]/section/div/form/div[2]/div/a').click()
+
+  time.sleep(2)
+
+  key_word = "product_detail"
+
+  filelists = []
+  for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す 
+      if key_word in file:
+
+        os.rename(file, 'SHOPLIST商品データ.csv')
+        shutil.move('SHOPLIST商品データ.csv',"C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA") 
+
+
+
+
+
+#売上集計
+driver.get('https://service.shop-list.com/shopadmin/menu/SummaryMenu')
+
+#日次販売商品
+driver.get('https://service.shop-list.com/shopadmin/summary/DailySalesProduct/')
+
+today = datetime.datetime.today() - timedelta(days=1)
+
+year_n = today.year
+month_n = today.month
+day_n = today.day
+
+print(day_n)
+
+day = day_n
+
+driver.find_element_by_xpath('//*[@id="main"]/section[3]/table[2]/tbody/tr[' + str(day + 1) +']/td[3]/a').click()
+
+time.sleep(4)
+
+driver.find_element_by_xpath('//*[@id="searchArea"]/div/div[2]/div/span').click()
+
+time.sleep(3)
+
+key_word = "sales_product"
+
+filelists = []
+for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す 
+    if key_word in file:
+
+      os.rename(file, 'SHOPLIST売上データ.csv')
+      shutil.move('SHOPLIST売上データ.csv',"C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA") 
+
+driver.close()                          
+                          
+file_path = "C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA/SHOPLIST売上データ.csv" 
+
+#OUTPUT_FILE = "C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA_OUTPUT/●外部データ連携_売上返品データ(SHOPLIST).xlsx"
+OUTPUT_FILE = "C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA_OUTPUT/test●外部データ連携_売上返品データ(SHOPLIST).xlsx"
+
+#
+C_element = '0' #現金区分
+D_element = '009998' #担当者コード
+F_element = "20001001"
+J_element = '20001004'
+L_element = '01'
+R_element = '0'#上代単価
+S_element = '0'
+T_element = '0'
+
+r_file = pd.read_csv(file_path,encoding="cp932")
+df_file = pd.DataFrame(r_file)
+
+#商品ユニークりすｒち
+UNQ_list = np.unique(pd.DataFrame(df_file["商品番号"].values,columns=["商品番号"]))
+
+#item_cd = pd.DataFrame(df_file["商品番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号"])
+item_cd = pd.DataFrame(df_file["商品番号"].values,columns=["商品番号"])
+item_name = pd.DataFrame(df_file["商品名"],columns=["商品名"])
+item_color = pd.DataFrame(df_file["商品番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号"])
+item_quantity = pd.DataFrame(df_file['販売個数(合計)'].values,columns=["数量"])
+item_amount = pd.DataFrame(df_file['受注高'].values,columns=["金額"])
+
+concat_list = pd.DataFrame(pd.concat([item_cd,item_name,item_quantity,item_amount],axis=1))
+
+print(concat_list)
+
+item_list = []
+for i in UNQ_list:
+  print(i)
+  print(concat_list["商品番号"])
+#for i,i2,i3,i4 in zip(item_cd.values,item_name.values,item_quantity.values,item_amount.values):
+  
+  element = len(str(i))
+  datas = concat_list[concat_list["商品番号"].values == i]
+  print(datas)
+
+  if element == 12 :
+    element1 = str(i)[:10]
+    element2 = str(i)[10:11].zfill(2)
+    element3 = str(i)[11:]
+    print(element1,element2,element3)
+    
+  elif element == 14 :
+    
+    element1 = str(i)[:10]
+    element2 = str(i)[10:11].zfill(2)
+    element3 = str(i)[11:]
+    print(element1,element2,element3) 
+    
+  elif element == 15 :
+    element1 = str(i)[:10]
+    element2 = str(i)[10:12].zfill(2)
+    element3 = str(i)[12:]
+      
+    
+  else:
+    element1 = str(i)[:10]
+    element2 = str(i)[10:12].zfill(2)
+    element3 = str(i)[12:]
+
+  names = datas["商品名"].values[0]
+  
+  data = pd.DataFrame({"商品番号":[element1],"商品名":[names],"カラー":[element2],"サイズ":[element3],"数量":[sum(datas["数量"].values)],"金額":[sum(datas["金額"].values)]})
+  
+  item_list.append(data)
+  
+compe_list = pd.concat(item_list)
+
+print(compe_list)
+#==================== 出力 ======================
+
+wb = pyxl.load_workbook(OUTPUT_FILE)
+
+
+sheet_name = str(year_n) + str(month_n).zfill(2) + 'URI'
+sheetnamelist = wb.sheetnames
+
+if sheet_name in sheetnamelist:
+  print("あります")
+  ws = wb[str(sheet_name)]
+  print(ws)
+  
+else:
+  print("ありません")  
+  source = wb["URI"]
+  
+  copy_ = wb.copy_worksheet(source)
+  copy_.title = sheet_name
+  
+ws = wb[str(sheet_name)]
+
+
+#最終行
+last_row = ws.max_row 
+print("最終行",last_row) 
+
+index_n = 1
+
+for insert_data in compe_list.values:
+
+  item_CD = insert_data[0]
+  item_NAME = insert_data[1]
+  item_COLOR = insert_data[2]
+  item_SIZE = insert_data[3]
+  item_QUANTITY = insert_data[4]
+  item_AMAUNT = insert_data[5]
+
+  ws["A" + str(last_row + index_n )].value = str(year_n) + str(month_n).zfill(2) + str(day_n).zfill(2)
+  ws["B" + str(last_row + index_n )].value = str(year_n) + str(month_n).zfill(2) + str(day_n).zfill(2)
+  ws["C" + str(last_row + index_n )].value = C_element
+  ws["D" + str(last_row + index_n )].value = D_element
+  
+  for macth_CD,change_CD in zip(df_ReDataList["アラジン"].values,df_ReDataList["SHOPLIST"].values):
+    # print(item_CD,macth_CD)
+    if str(item_CD) == str(macth_CD):
+      item_CD = change_CD
+      print("変換")
+      
+      print(item_CD,"⇒",change_CD)
+      
+
+  ws["M" + str(last_row + index_n )].value = item_CD
+  
+  ws["N" + str(last_row + index_n )].value = item_NAME
+  
+  
+  ws["F" + str(last_row + index_n )].value = F_element
+  ws["J" + str(last_row + index_n )].value = J_element
+  ws["L" + str(last_row + index_n )].value = L_element
+  
+  ws["P" + str(last_row + index_n)].value = item_COLOR
+  ws["Q" + str(last_row + index_n)].value = item_SIZE 
+  ws["R" + str(last_row + index_n )].value = R_element
+  ws["S" + str(last_row + index_n )].value = S_element
+  ws["T" + str(last_row + index_n )].value = T_element
+  
+  ws["U" + str(last_row + index_n)].value = item_QUANTITY
+  
+  try :
+    ws["V" + str(last_row + index_n)].value = math.ceil(item_AMAUNT/item_QUANTITY)#商品単価
+    
+  except ZeroDivisionError:
+    ws["V" + str(last_row + index_n)].value = 0#商品単価
+      
+  
+  ws["W" + str(last_row + index_n)].value = math.ceil(item_AMAUNT * 1.1)#税込金額
+  
+  index_n += 1
+  
+wb.save("C:/Users/fun-f/Desktop/analysis/SHOPLIST_DATA_OUTPUT/test●外部データ連携_売上返品データ(SHOPLIST).xlsx")
+  
