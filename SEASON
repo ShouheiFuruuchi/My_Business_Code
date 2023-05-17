@@ -1,0 +1,1206 @@
+import pandas as pd
+import openpyxl as xlpy
+import numpy as np
+import datetime
+import os
+
+def season_analysis():
+
+
+  #季節データの抽出
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  kasiwa = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[3]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[3]','柏','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[3]','FUN柏']
+
+  chiba = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[4]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[4]', '千葉','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[4]','FUN千葉C-one']
+
+  isesaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[9]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[9]','伊勢崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[9]','FUNスマーク伊勢崎']
+
+  nagamachi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[11]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[11]','長町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[11]','FUNララガーデン長町']
+
+  hunabashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[12]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[12]','船橋','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[12]','FUNららぽーとTOKYO-BAY']
+
+  hujimi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[13]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[13]','富士見','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[13]','FUNららぽーと富士見']
+
+  reiku = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[15]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[15]','レイク','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[15]','FUNイオンレイクタウン']
+
+  ebina = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[17]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[17]','海老名','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[17]','FUNららぽーと海老名']
+
+  musashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[18]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[18]','むさし','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[18]','FUNイオンモールむさし村山']
+
+  hiratuka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[19]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[19]','平塚','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[19]','FUNららぽーと湘南平塚']
+
+  natori = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[20]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[20]','名取','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[20]','FUNイオンモール名取']
+
+  otaka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[21]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[21]','大高','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[21]','FUNイオンモール大高']
+
+  togocyo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[22]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[22]','東郷町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[22]','FUNららぽーと愛知東郷']
+
+  ota = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[23]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[23]','太田','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[23]','FUNイオンモール太田']
+
+  mito = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[24]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[24]','水戸','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[24]','FUNイオンモール水戸内原']
+
+  expo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[25]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[25]','EXPO','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[25]','FUNららぽーとEXPOCITY']
+
+  kawasaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[26]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[26]','川崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[26]','FUNラゾーナ川崎プラザ']
+
+  sinmisato = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[27]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[27]','新三郷','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[27]','FUNららぽーと新三郷']
+
+  makuhari = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[28]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[28]','幕張','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[28]','FUNイオンモール幕張新都心']
+
+  kagamihara = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[29]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[29]','各務原','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[29]','FUNイオンモール各務原']
+
+  sakai = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[30]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[30]','堺','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[30]','FUNららぽーと堺']
+
+  tenpo_list = [
+    kasiwa,
+    chiba,
+    isesaki,
+    # nagamachi,
+    # hunabashi,
+    hujimi,
+    reiku,
+    ebina,
+    musashi,
+    hiratuka,
+    natori,
+    otaka,
+    togocyo,
+    ota,
+    mito,
+    expo,
+    kawasaki,
+    sinmisato,
+    makuhari,
+    kagamihara,
+    sakai,
+    ]
+
+
+
+
+  out_file2 = "C:/Users/fun-f/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/シフト管理/予実管理.xlsx"#予実管理出力ファイル
+  file_path = "C:/Users/fun-f/Desktop/myfile/dataf/全店.csv"#商品別売上集計
+
+  #転記専用
+  wb_out_file2 = xlpy.load_workbook(out_file2)
+  ws_out_file2 = wb_out_file2["シーズンデータ"]
+
+
+  #読込専用
+  wb_read_file2 = xlpy.load_workbook(out_file2,data_only=True)
+  ws_read_file2 = wb_read_file2["Columns"]
+
+
+  #店舗Col数を取得
+
+  shop_count = len(tenpo_list)
+  shop_key_list = {}
+  for elements_key in range(2,shop_count+2):
+    shop_key = ws_read_file2["B" + str(elements_key)].value
+    OP_col = ws_read_file2["D" + str(elements_key)].value
+    CD_col = ws_read_file2["E" + str(elements_key)].value
+    JK_col = ws_read_file2["F" + str(elements_key)].value
+    KT_col = ws_read_file2["G" + str(elements_key)].value
+    CS_col = ws_read_file2["H" + str(elements_key)].value
+    CT_col = ws_read_file2["I" + str(elements_key)].value
+    BL_col = ws_read_file2["J" + str(elements_key)].value
+    SK_col = ws_read_file2["K" + str(elements_key)].value
+    PT_col = ws_read_file2["L" + str(elements_key)].value
+    TR_col = ws_read_file2["M" + str(elements_key)].value
+    INN_col = ws_read_file2["N" + str(elements_key)].value
+    SETUP_col = ws_read_file2["O" + str(elements_key)].value
+    ACC_col = ws_read_file2["P" + str(elements_key)].value
+    SH_col = ws_read_file2["Q" + str(elements_key)].value
+    
+    shop_key_list[str(shop_key)] = [
+      OP_col,
+          CD_col,
+          JK_col,
+          KT_col,
+          CS_col,
+          CT_col,
+          BL_col,
+          SK_col,
+          PT_col,
+          TR_col,
+          INN_col,
+          SETUP_col,
+          ACC_col,
+          SH_col,
+      
+    ]
+    
+
+  print(shop_key_list)
+
+
+  #季節データの抽出
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  r_file3 = pd.read_csv(file_path,encoding="cp932")#商品別売上集計
+  df_r_file3 = pd.DataFrame(r_file3)
+
+  season_list = []
+  bestlist = []
+
+  #季節CD分類
+  season_cd = np.unique(df_r_file3["分類３名"])
+  print(season_cd)
+
+  #総売上金額
+  all_sales = sum(df_r_file3["合計金額"].values)
+
+  #総売上点数
+  all_quantity = sum(df_r_file3["合計数量"].values)
+
+  print("総売り上げ",all_sales)
+
+  for s_cd in season_cd:
+    season_sort = df_r_file3[df_r_file3["分類３名"] == s_cd]
+    season_values = sum(season_sort["合計金額"].values)
+    season_quantity = sum(season_sort["合計数量"].values)
+    season_ratio = "{: .1f}".format(float(season_values/all_sales) * 100)
+    row_data = pd.DataFrame({"季節分類":[s_cd],"売上金額":[season_values],"売上数量":[season_quantity],"売上構成比":[season_ratio]})
+    season_list.append(row_data)
+    print(row_data)
+  con_season_list = pd.concat(season_list,axis=0).sort_values("売上金額",ascending=False).head(5)
+  print("チェック")
+  print(con_season_list)
+  #----------------------------------------------------------------------
+  #商品ベストリストを作成
+
+  bestlist = []
+
+  item_name_list = pd.DataFrame(df_r_file3["商品名"],columns=["商品名"])
+  for cd3 in np.unique(item_name_list):
+    key_item3 = df_r_file3[df_r_file3["商品名"] == cd3 ]
+    item_cd3 = pd.DataFrame(np.unique(key_item3["商品コード"].astype('str').str.zfill(10).str[:10].values),columns=["商品CD"])
+    item_name3 = pd.DataFrame(np.unique(key_item3["商品名"].values),columns=["商品名"])
+    category_cd3 = pd.DataFrame(np.unique(key_item3["商品コード"].astype('str').str.zfill(10).str[2:4].values),columns=["アイテムCD"])
+    season_cd3 = pd.DataFrame(np.unique(key_item3["分類３名"]),columns=["季節分類"])
+    quantity3 = pd.DataFrame([int(sum(key_item3["合計数量"].values))],columns=["数量"])
+    amount3 = pd.DataFrame([int(sum(key_item3["合計金額"].values))],columns=["金額"])
+    
+    set_data3 = pd.concat([item_cd3,item_name3,category_cd3,season_cd3,quantity3,amount3],axis=1)
+    bestlist.append(set_data3)
+
+  con_bestlist = pd.concat(bestlist,axis=0)
+  print(con_bestlist)
+  op = con_bestlist[con_bestlist['アイテムCD'] == '01']
+  cd = con_bestlist[con_bestlist['アイテムCD'] == '02']
+  jk = con_bestlist[con_bestlist['アイテムCD'] == '03']
+  kt = con_bestlist[con_bestlist['アイテムCD'] == '04']
+  cs = con_bestlist[con_bestlist['アイテムCD'] == '05']
+  ct = con_bestlist[con_bestlist['アイテムCD'] == '06']
+  bl = con_bestlist[con_bestlist['アイテムCD'] == '07']
+  sk = con_bestlist[con_bestlist['アイテムCD'] == '08']
+  pt = con_bestlist[con_bestlist['アイテムCD'] == '09']
+  tr = con_bestlist[con_bestlist['アイテムCD'] == '10']
+  inn = con_bestlist[con_bestlist['アイテムCD'] == '11']
+  setup = con_bestlist[con_bestlist['アイテムCD'] == '12']
+  acc = con_bestlist[con_bestlist['アイテムCD'] == '13']
+  sh = con_bestlist[con_bestlist['アイテムCD'] == '15']
+
+
+  #アイテム金額構成比リスト
+
+  try :
+    df_op = pd.DataFrame({'アイテムCD':['OP'],'CD':['01'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[sum(op['金額'].values)],'売上構成比':[sum(op['金額'].values/all_sales)]})
+
+
+  except ZeroDivisionError:
+    df_op = pd.DataFrame({'アイテムCD':['OP'],'CD':['01'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[0],'売上構成比':[0]})
+    
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "01")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_op[str(s_cd)] = [key_category_sales]
+
+  print(df_op)  
+  try :
+    df_cd = pd.DataFrame({'アイテムCD':['CD'],'CD':['02'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(cd['金額'].values)],'売上構成比':[sum(cd['金額'].values/all_sales)]})
+    
+    
+  except ZeroDivisionError:
+    
+    df_cd = pd.DataFrame({'アイテムCD':['CD'],'CD':['02'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "02")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_cd[str(s_cd)] = [key_category_sales]
+    
+  try:
+    df_jk = pd.DataFrame({'アイテムCD':['JK'],'CD':['03'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(jk['金額'].values)],'売上構成比':[sum(jk['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError :
+    
+    df_jk = pd.DataFrame({'アイテムCD':['JK'],'CD':['03'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "03")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_jk[str(s_cd)] = [key_category_sales]  
+    
+  try :  
+    df_kt = pd.DataFrame({'アイテムCD':['KT'],'CD':['04'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(kt['金額'].values)],'売上構成比':[sum(kt['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    df_kt = pd.DataFrame({'アイテムCD':['KT'],'CD':['04'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+  
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "04")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_kt[str(s_cd)] = [key_category_sales]  
+    
+  try :
+    df_cs = pd.DataFrame({'アイテムCD':['CS'],'CD':['05'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(cs['金額'].values)],'売上構成比':[sum(cs['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError :
+    
+    df_cs = pd.DataFrame({'アイテムCD':['CS'],'CD':['05'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "05")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_cs[str(s_cd)] = [key_category_sales]
+    
+  try :  
+    df_ct = pd.DataFrame({'アイテムCD':['CT'],'CD':['06'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(ct['金額'].values)],'売上構成比':[sum(ct['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_ct = pd.DataFrame({'アイテムCD':['CT'],'CD':['06'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "06")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_ct[str(s_cd)] = [key_category_sales]  
+  try :  
+    
+    df_bl = pd.DataFrame({'アイテムCD':['BL'],'CD':['07'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(bl['金額'].values)],'売上構成比':[sum(bl['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_bl = pd.DataFrame({'アイテムCD':['BL'],'CD':['07'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "07")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_bl[str(s_cd)] = [key_category_sales]  
+  try :  
+    
+    df_sk = pd.DataFrame({'アイテムCD':['SK'],'CD':['08'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[sum(sk['金額'].values)],'売上構成比':[sum(sk['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_sk = pd.DataFrame({'アイテムCD':['SK'],'CD':['08'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[0],'売上構成比':[0]})
+    
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "08")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_sk[str(s_cd)] = [key_category_sales]  
+    
+  try:    
+    df_pt = pd.DataFrame({'アイテムCD':['PT'],'CD':['09'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[sum(pt['金額'].values)],'売上構成比':[sum(pt['金額'].values/all_sales)]})
+
+  except ZeroDivisionError:
+    
+    df_pt = pd.DataFrame({'アイテムCD':['PT'],'CD':['09'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "09")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_pt[str(s_cd)] = [key_category_sales]  
+    
+  try :  
+    df_tr = pd.DataFrame({'アイテムCD':['TR'],'CD':['10'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(tr['金額'].values)],'売上構成比':[sum(tr['金額'].values/all_sales)]})
+  except ZeroDivisionError: 
+    
+    df_tr = pd.DataFrame({'アイテムCD':['TR'],'CD':['10'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]}) 
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "10")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_tr[str(s_cd)] = [key_category_sales]  
+    
+  try :  
+    df_inn = pd.DataFrame({'アイテムCD':['INN'],'CD':['11'],'用途分類':['インナー'],'用途CD':['5'],'金額':[sum(inn['金額'].values)],'売上構成比':[sum(inn['金額'].values/all_sales)]})
+  except ZeroDivisionError:  
+    
+    df_inn = pd.DataFrame({'アイテムCD':['INN'],'CD':['11'],'用途分類':['インナー'],'用途CD':['5'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "11")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_inn[str(s_cd)] = [key_category_sales]
+  try:  
+    df_setup = pd.DataFrame({'アイテムCD':['SETUP'],'CD':['12'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[sum(setup['金額'].values)],'売上構成比':[sum(setup['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_setup = pd.DataFrame({'アイテムCD':['SETUP'],'CD':['12'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[0],'売上構成比':[0]})
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "12")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_setup[str(s_cd)] = [key_category_sales]  
+    
+  try:  
+    df_acc = pd.DataFrame({'アイテムCD':['ACC'],'CD':['13'],'用途分類':['ACC'],'用途CD':['6'],'金額':[sum(acc['金額'].values)],'売上構成比':[sum(acc['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_acc = pd.DataFrame({'アイテムCD':['ACC'],'CD':['13'],'用途分類':['ACC'],'用途CD':['6'],'金額':[0],'売上構成比':[0]})
+
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "13")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_acc[str(s_cd)] = [key_category_sales]  
+    
+  try :  
+    df_sh = pd.DataFrame({'アイテムCD':['SH'],'CD':['14'],'用途分類':['シューズ'],'用途CD':['7'],'金額':[sum(sh['金額'].values)],'売上構成比':[sum(sh['金額'].values/all_sales)]})
+    
+  except ZeroDivisionError:
+    
+    df_sh = pd.DataFrame({'アイテムCD':['SH'],'CD':['14'],'用途分類':['シューズ'],'用途CD':['7'],'金額':[0],'売上構成比':[0]})
+    
+  for s_cd in con_season_list["季節分類"]:
+    key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "15")]
+    key_category_sales = sum(key_category["金額"].values)
+    
+    df_sh[str(s_cd)] = [key_category_sales]  
+    
+
+  item_rank = pd.concat([df_op,df_cd,df_jk,df_kt,df_cs,df_ct,df_bl,df_sk,df_pt,df_tr,df_inn,df_setup,df_acc,df_sh],axis=0)
+  print(item_rank)
+
+
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  w_day_2 = '{:%Y%m%d}'.format(datetime.datetime.today())
+  year_2 = w_day_2[0:4]
+  month_2 = w_day_2[4:6]
+  day_2 = w_day_2[6:8]
+
+  select_day = str(year_2) + "-" + str(month_2) +"-" + str(day_2) + " 00:00:00"
+
+  print("値を確認",item_rank[item_rank["アイテムCD"] == "OP"].values)
+
+  print(select_day)
+  print("ここ" + str(select_day))
+  for i in range(0,366):#364
+    target_cell = ws_out_file2["A" + str(369 + i)].value#4⇒369
+    
+    if str(target_cell) != str(select_day):
+      print("No")
+      
+    else:
+      
+      cell_r = 369 + i#4⇒369
+      print(cell_r)
+
+
+      pitch = 7 #列間隔
+      out_file2_header = cell_r#行番号
+      #out_file2_col =2 + (tenpo_pitch[shop] * pitch)#列番号
+      
+      SEASON_UNQ = np.unique(con_season_list["季節分類"].values)
+      
+      ws_out_file2.cell(out_file2_header,12).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,18).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,24).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,30).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,36).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,42).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,48).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,54).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,60).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,66).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,72).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,78).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,84).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][4]#
+      ws_out_file2.cell(out_file2_header,90).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][4]#
+        
+      ws_out_file2.cell(out_file2_header,2).value = con_season_list.values[0][0]
+      ws_out_file2.cell(out_file2_header,3).value = con_season_list.values[0][1]
+      ws_out_file2.cell(out_file2_header,13).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,19).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,25).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,31).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,37).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,43).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,49).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,55).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,61).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,67).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,73).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,79).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,85).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][6]#
+      ws_out_file2.cell(out_file2_header,91).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][6]#
+        
+      if len(season_cd) >4:
+        ws_out_file2.cell(out_file2_header,4).value = con_season_list.values[1][0]
+        ws_out_file2.cell(out_file2_header,5).value = con_season_list.values[1][1]
+        ws_out_file2.cell(out_file2_header,14).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,20).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,26).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,32).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,38).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,44).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,50).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,56).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,62).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,68).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,74).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,80).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,86).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,92).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+        
+        
+        
+        ws_out_file2.cell(out_file2_header,6).value = con_season_list.values[2][0]
+        ws_out_file2.cell(out_file2_header,7).value = con_season_list.values[2][1]
+        ws_out_file2.cell(out_file2_header,15).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,45).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,21).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,27).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,33).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,39).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,51).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,57).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,63).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,69).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,75).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,81).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,87).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,93).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+        
+        
+        
+        ws_out_file2.cell(out_file2_header,8).value = con_season_list.values[3][0]
+        ws_out_file2.cell(out_file2_header,9).value = con_season_list.values[3][1]
+        ws_out_file2.cell(out_file2_header,16).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,22).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,28).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,34).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,40).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,46).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,52).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,58).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,64).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,70).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,76).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,82).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,88).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,94).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][9]#
+        
+        ws_out_file2.cell(out_file2_header,10).value = con_season_list.values[4][0]
+        ws_out_file2.cell(out_file2_header,11).value = con_season_list.values[4][1]
+        ws_out_file2.cell(out_file2_header,17).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,23).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,29).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,35).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,41).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,47).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,53).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,59).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,65).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,71).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,77).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,83).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,89).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][10]#
+        
+        ws_out_file2.cell(out_file2_header,95).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][10]#
+    
+        
+        
+      elif len(season_cd) >3:  
+        ws_out_file2.cell(out_file2_header,4).value = con_season_list.values[1][0]
+        ws_out_file2.cell(out_file2_header,5).value = con_season_list.values[1][1]
+        ws_out_file2.cell(out_file2_header,14).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,20).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,26).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,32).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,38).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,44).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,50).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,56).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,62).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,68).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,74).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,80).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,86).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,92).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+        
+        
+        
+        ws_out_file2.cell(out_file2_header,6).value = con_season_list.values[2][0]
+        ws_out_file2.cell(out_file2_header,7).value = con_season_list.values[2][1]
+        ws_out_file2.cell(out_file2_header,15).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,45).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,21).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,27).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,33).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,39).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,51).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,57).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,63).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,69).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,75).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,81).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,87).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,93).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+        
+        
+        
+        ws_out_file2.cell(out_file2_header,8).value = con_season_list.values[3][0]
+        ws_out_file2.cell(out_file2_header,9).value = con_season_list.values[3][1]
+        ws_out_file2.cell(out_file2_header,16).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,22).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,28).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,34).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,40).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,46).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,52).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,58).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,64).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,70).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,76).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,82).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,88).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][9]#
+        ws_out_file2.cell(out_file2_header,94).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][9]#
+        
+        
+      
+      elif len(season_cd) >2:  
+        
+        ws_out_file2.cell(out_file2_header,4).value = con_season_list.values[1][0]
+        ws_out_file2.cell(out_file2_header,5).value = con_season_list.values[1][1]
+        ws_out_file2.cell(out_file2_header,14).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,20).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,26).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,32).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,38).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,44).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,50).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,56).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,62).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,68).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,74).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,80).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,86).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,92).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+        
+        
+        
+        ws_out_file2.cell(out_file2_header,6).value = con_season_list.values[2][0]
+        ws_out_file2.cell(out_file2_header,7).value = con_season_list.values[2][1]
+        ws_out_file2.cell(out_file2_header,15).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,45).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,21).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,27).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,33).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,39).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,51).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,57).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,63).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,69).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,75).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,81).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,87).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+        ws_out_file2.cell(out_file2_header,93).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+        
+        
+        
+      elif len(season_cd) >1:  
+        
+        
+        ws_out_file2.cell(out_file2_header,4).value = con_season_list.values[1][0]
+        ws_out_file2.cell(out_file2_header,5).value = con_season_list.values[1][1]
+        ws_out_file2.cell(out_file2_header,14).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,20).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,26).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,32).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,38).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,44).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,50).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,56).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,62).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,68).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,74).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,80).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,86).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+        ws_out_file2.cell(out_file2_header,92).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+        
+        
+      # wb_out_file2.save(out_file2)
+      
+      # break
+    
+    
+  file_path = 'C:/Users/fun-f/Desktop/myfile/dataf'
+    
+  file_names = os.listdir(file_path)
+
+
+  files_list = []
+  concat_file = []
+
+
+  for i in file_names:
+    if "販売ログ" in i:
+      files_list.append(i)
+
+  #顧客データ分析
+
+  range_count = len(files_list) #- 1
+
+  folder_path = 'C:/Users/fun-f/Desktop/analysis/create_file/'
+
+  file_name_1 = os.listdir(folder_path)
+
+  #bk_1 = xlpy.load_workbook("C:/Users/fun-f/Desktop/analysis/週間分析途中.xlsx")#当日実績を入力するファイル
+  #------------------------------------------------------------------------------
+  for file_n,n in zip(files_list,range(0,int(range_count))) :
+    
+    shop = file_n.replace('販売ログ.csv','')#店名
+    print("ショップ名",shop)
+    
+    
+    #店別季節データをを抽出
+    #==========================================================================================================
+
+    shop_r_file3 = pd.read_csv("C:/Users/fun-f/Desktop/myfile/dataf/" + str(shop) + ".csv",encoding="cp932")#商品別売上集計
+    #季節データの抽出
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    # r_file3 = pd.read_csv(shop_r_file3,encoding="SHIFT-JIS")#商品別売上集計
+    df_r_file3 = pd.DataFrame(shop_r_file3)
+
+    season_list = []
+    bestlist = []
+
+    #季節CD分類
+    season_cd = np.unique(df_r_file3["分類３名"])
+    print(season_cd)
+
+    #総売上金額
+    all_sales = sum(df_r_file3["合計金額"].values)
+
+    #総売上点数
+    all_quantity = sum(df_r_file3["合計数量"].values)
+
+    print("総売り上げ",all_sales)
+    
+    if all_sales == 0:
+      print("売上無し")
+      
+      
+    else:  
+
+      for s_cd in season_cd:
+        season_sort = df_r_file3[df_r_file3["分類３名"] == s_cd]
+        season_values = sum(season_sort["合計金額"].values)
+        season_quantity = sum(season_sort["合計数量"].values)
+        season_ratio = "{: .1f}".format(float(season_values/all_sales) * 100)
+        row_data = pd.DataFrame({"季節分類":[s_cd],"売上金額":[season_values],"売上数量":[season_quantity],"売上構成比":[season_ratio]})
+        season_list.append(row_data)
+        print(row_data)
+      con_season_list = pd.concat(season_list,axis=0).sort_values("売上金額",ascending=False).head(5)
+      print("チェック")
+      print(con_season_list)
+      # ----------------------------------------------------------------------
+      # 商品ベストリストを作成
+
+      bestlist = []
+
+      item_name_list = pd.DataFrame(df_r_file3["商品名"],columns=["商品名"])
+      for cd3 in np.unique(item_name_list):
+        key_item3 = df_r_file3[df_r_file3["商品名"] == cd3 ]
+        item_cd3 = pd.DataFrame(np.unique(key_item3["商品コード"].astype('str').str.zfill(10).str[:10].values),columns=["商品CD"])
+        item_name3 = pd.DataFrame(np.unique(key_item3["商品名"].values),columns=["商品名"])
+        category_cd3 = pd.DataFrame(np.unique(key_item3["商品コード"].astype('str').str.zfill(10).str[2:4].values),columns=["アイテムCD"])
+        season_cd3 = pd.DataFrame(np.unique(key_item3["分類３名"]),columns=["季節分類"])
+        quantity3 = pd.DataFrame([int(sum(key_item3["合計数量"].values))],columns=["数量"])
+        amount3 = pd.DataFrame([int(sum(key_item3["合計金額"].values))],columns=["金額"])
+        
+        set_data3 = pd.concat([item_cd3,item_name3,category_cd3,season_cd3,quantity3,amount3],axis=1)
+        bestlist.append(set_data3)
+
+      con_bestlist = pd.concat(bestlist,axis=0)
+      print(con_bestlist)
+      op = con_bestlist[con_bestlist['アイテムCD'] == '01']
+      cd = con_bestlist[con_bestlist['アイテムCD'] == '02']
+      jk = con_bestlist[con_bestlist['アイテムCD'] == '03']
+      kt = con_bestlist[con_bestlist['アイテムCD'] == '04']
+      cs = con_bestlist[con_bestlist['アイテムCD'] == '05']
+      ct = con_bestlist[con_bestlist['アイテムCD'] == '06']
+      bl = con_bestlist[con_bestlist['アイテムCD'] == '07']
+      sk = con_bestlist[con_bestlist['アイテムCD'] == '08']
+      pt = con_bestlist[con_bestlist['アイテムCD'] == '09']
+      tr = con_bestlist[con_bestlist['アイテムCD'] == '10']
+      inn = con_bestlist[con_bestlist['アイテムCD'] == '11']
+      setup = con_bestlist[con_bestlist['アイテムCD'] == '12']
+      acc = con_bestlist[con_bestlist['アイテムCD'] == '13']
+      sh = con_bestlist[con_bestlist['アイテムCD'] == '15']
+
+
+      #アイテム金額構成比リスト
+
+      try :
+        df_op = pd.DataFrame({'アイテムCD':['OP'],'CD':['01'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[sum(op['金額'].values)],'売上構成比':[sum(op['金額'].values/all_sales)]})
+
+
+      except ZeroDivisionError:
+        df_op = pd.DataFrame({'アイテムCD':['OP'],'CD':['01'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[0],'売上構成比':[0]})
+        
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "01")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_op[str(s_cd)] = [key_category_sales]
+
+      print(df_op)  
+      try :
+        df_cd = pd.DataFrame({'アイテムCD':['CD'],'CD':['02'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(cd['金額'].values)],'売上構成比':[sum(cd['金額'].values/all_sales)]})
+        
+        
+      except ZeroDivisionError:
+        
+        df_cd = pd.DataFrame({'アイテムCD':['CD'],'CD':['02'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "02")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_cd[str(s_cd)] = [key_category_sales]
+        
+      try:
+        df_jk = pd.DataFrame({'アイテムCD':['JK'],'CD':['03'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(jk['金額'].values)],'売上構成比':[sum(jk['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError :
+        
+        df_jk = pd.DataFrame({'アイテムCD':['JK'],'CD':['03'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "03")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_jk[str(s_cd)] = [key_category_sales]  
+        
+      try :  
+        df_kt = pd.DataFrame({'アイテムCD':['KT'],'CD':['04'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(kt['金額'].values)],'売上構成比':[sum(kt['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        df_kt = pd.DataFrame({'アイテムCD':['KT'],'CD':['04'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+      
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "04")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_kt[str(s_cd)] = [key_category_sales]  
+        
+      try :
+        df_cs = pd.DataFrame({'アイテムCD':['CS'],'CD':['05'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(cs['金額'].values)],'売上構成比':[sum(cs['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError :
+        
+        df_cs = pd.DataFrame({'アイテムCD':['CS'],'CD':['05'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "05")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_cs[str(s_cd)] = [key_category_sales]
+        
+      try :  
+        df_ct = pd.DataFrame({'アイテムCD':['CT'],'CD':['06'],'用途分類':['羽織'],'用途CD':['2'],'金額':[sum(ct['金額'].values)],'売上構成比':[sum(ct['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_ct = pd.DataFrame({'アイテムCD':['CT'],'CD':['06'],'用途分類':['羽織'],'用途CD':['2'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "06")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_ct[str(s_cd)] = [key_category_sales]  
+      try :  
+        
+        df_bl = pd.DataFrame({'アイテムCD':['BL'],'CD':['07'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(bl['金額'].values)],'売上構成比':[sum(bl['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_bl = pd.DataFrame({'アイテムCD':['BL'],'CD':['07'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]})
+ 
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "07")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_bl[str(s_cd)] = [key_category_sales]  
+      try :  
+        
+        df_sk = pd.DataFrame({'アイテムCD':['SK'],'CD':['08'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[sum(sk['金額'].values)],'売上構成比':[sum(sk['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_sk = pd.DataFrame({'アイテムCD':['SK'],'CD':['08'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[0],'売上構成比':[0]})
+        
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "08")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_sk[str(s_cd)] = [key_category_sales]  
+        
+      try:    
+        df_pt = pd.DataFrame({'アイテムCD':['PT'],'CD':['09'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[sum(pt['金額'].values)],'売上構成比':[sum(pt['金額'].values/all_sales)]})
+
+      except ZeroDivisionError:
+        
+        df_pt = pd.DataFrame({'アイテムCD':['PT'],'CD':['09'],'用途分類':['ボトムス'],'用途CD':['4'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "09")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_pt[str(s_cd)] = [key_category_sales]  
+        
+      try :  
+        df_tr = pd.DataFrame({'アイテムCD':['TR'],'CD':['10'],'用途分類':['トップス'],'用途CD':['3'],'金額':[sum(tr['金額'].values)],'売上構成比':[sum(tr['金額'].values/all_sales)]})
+      except ZeroDivisionError: 
+        
+        df_tr = pd.DataFrame({'アイテムCD':['TR'],'CD':['10'],'用途分類':['トップス'],'用途CD':['3'],'金額':[0],'売上構成比':[0]}) 
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "10")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_tr[str(s_cd)] = [key_category_sales]  
+        
+      try :  
+        df_inn = pd.DataFrame({'アイテムCD':['INN'],'CD':['11'],'用途分類':['インナー'],'用途CD':['5'],'金額':[sum(inn['金額'].values)],'売上構成比':[sum(inn['金額'].values/all_sales)]})
+      except ZeroDivisionError:  
+        
+        df_inn = pd.DataFrame({'アイテムCD':['INN'],'CD':['11'],'用途分類':['インナー'],'用途CD':['5'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "11")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_inn[str(s_cd)] = [key_category_sales]
+      try:  
+        df_setup = pd.DataFrame({'アイテムCD':['SETUP'],'CD':['12'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[sum(setup['金額'].values)],'売上構成比':[sum(setup['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_setup = pd.DataFrame({'アイテムCD':['SETUP'],'CD':['12'],'用途分類':['OP/SET UP'],'用途CD':['1'],'金額':[0],'売上構成比':[0]})
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "12")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_setup[str(s_cd)] = [key_category_sales]  
+        
+      try:  
+        df_acc = pd.DataFrame({'アイテムCD':['ACC'],'CD':['13'],'用途分類':['ACC'],'用途CD':['6'],'金額':[sum(acc['金額'].values)],'売上構成比':[sum(acc['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_acc = pd.DataFrame({'アイテムCD':['ACC'],'CD':['13'],'用途分類':['ACC'],'用途CD':['6'],'金額':[0],'売上構成比':[0]})
+
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "13")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_acc[str(s_cd)] = [key_category_sales]  
+        
+      try :  
+        df_sh = pd.DataFrame({'アイテムCD':['SH'],'CD':['14'],'用途分類':['シューズ'],'用途CD':['7'],'金額':[sum(sh['金額'].values)],'売上構成比':[sum(sh['金額'].values/all_sales)]})
+        
+      except ZeroDivisionError:
+        
+        df_sh = pd.DataFrame({'アイテムCD':['SH'],'CD':['14'],'用途分類':['シューズ'],'用途CD':['7'],'金額':[0],'売上構成比':[0]})
+        
+      for s_cd in con_season_list["季節分類"]:
+        key_category = con_bestlist[(con_bestlist['季節分類'] == s_cd) & (con_bestlist['アイテムCD'] == "15")]
+        key_category_sales = sum(key_category["金額"].values)
+        
+        df_sh[str(s_cd)] = [key_category_sales]  
+        
+
+      item_rank = pd.concat([df_op,df_cd,df_jk,df_kt,df_cs,df_ct,df_bl,df_sk,df_pt,df_tr,df_inn,df_setup,df_acc,df_sh],axis=0)
+      print(item_rank)
+
+
+      #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+      w_day_2 = '{:%Y%m%d}'.format(datetime.datetime.today())
+      year_2 = w_day_2[0:4]
+      month_2 = w_day_2[4:6]
+      day_2 = w_day_2[6:8]
+
+      select_day = str(year_2) + "-" + str(month_2) +"-" + str(day_2) + " 00:00:00"
+
+      print("値を確認",item_rank[item_rank["アイテムCD"] == "OP"].values)
+
+      print(select_day)
+      print("ここ" + str(select_day))
+      for i in range(0,366):#364
+        target_cell = ws_out_file2["A" + str(369 + i)].value#4⇒369
+        
+        if str(target_cell) != str(select_day):
+          print("No")
+          
+        else:
+          
+          cell_r = 369 + i#4⇒369
+          print(cell_r)
+
+
+          pitch = 7 #列間隔
+          out_file2_header = cell_r#行番号
+          #out_file2_col =2 + (tenpo_pitch[shop] * pitch)#列番号
+          
+          SEASON_UNQ = np.unique(con_season_list["季節分類"].values)
+          
+
+
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][0]).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][1]).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][2]).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][3]).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][4]).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][5]).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][6]).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][7]).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][8]).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][9]).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][10]).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][11]).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][12]).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][4]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][13]).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][4]#
+          
+          
+          col_ = 1
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] +col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][6]#
+          ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][6]#
+          
+          
+          if len(season_cd) >4:
+            
+            
+            col_ = 5
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][10]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][10]#
+            
+            col_ = 4
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][9]#
+            
+            col_ = 3 
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+            
+            col_ = 2
+            
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+            
+            
+          elif len(season_cd) >3: 
+            
+            col_ = 4
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][9]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][9]#
+            
+            col_ = 3 
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+            
+            col_ = 2
+            
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+          elif len(season_cd) >2:   
+            col_ = 3 
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][8]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][8]#
+            
+            col_ = 2
+            
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+            
+            
+          elif len(season_cd) >1:   
+            col_ = 2
+            
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][0] + col_).value = item_rank[item_rank["アイテムCD"] == "OP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][1] + col_).value = item_rank[item_rank["アイテムCD"] == "CD"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][2] + col_).value = item_rank[item_rank["アイテムCD"] == "JK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][3] + col_).value = item_rank[item_rank["アイテムCD"] == "KT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][4] + col_).value = item_rank[item_rank["アイテムCD"] == "CS"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][5] + col_).value = item_rank[item_rank["アイテムCD"] == "CT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][6] + col_).value = item_rank[item_rank["アイテムCD"] == "BL"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][7] + col_).value = item_rank[item_rank["アイテムCD"] == "SK"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][8] + col_).value = item_rank[item_rank["アイテムCD"] == "PT"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][9] + col_).value = item_rank[item_rank["アイテムCD"] == "TR"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][10] + col_).value = item_rank[item_rank["アイテムCD"] == "INN"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][11] + col_).value = item_rank[item_rank["アイテムCD"] == "SETUP"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][12] + col_).value = item_rank[item_rank["アイテムCD"] == "ACC"].values[0][7]#
+            ws_out_file2.cell(out_file2_header,shop_key_list[shop][13] + col_).value = item_rank[item_rank["アイテムCD"] == "SH"].values[0][7]#
+            
+           
+
+  wb_out_file2.save("C:/Users/fun-f/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/シフト管理/予実管理.xlsx")
+
+# season_analysis()
+      
+  
+
