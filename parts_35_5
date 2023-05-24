@@ -1,0 +1,23 @@
+
+#作成ファイルをcreate_file に移動するプログラムになります。
+
+
+import os
+import shutil
+
+path = "C:/Users/fun-f/Desktop/analysis"
+move_path = "C:/Users/fun-f/Desktop/analysis/create_file"
+
+files = os.listdir(path)
+
+
+for file in files :
+  if ".xlsx" in file and "【" in file:
+    if "~$" in file :
+      print("No_Move")
+      
+    else :
+      print(file)
+      shutil.move(os.path.join(path,file),"C:/Users/fun-f/Desktop/analysis/create_file/")
+    
+
