@@ -1,0 +1,35 @@
+#import File parts_31,32,33,34
+
+import parts_31
+import parts_32
+import parts_33
+import parts_34
+
+
+
+print("出力完了しました")
+
+#parts_31
+
+parts_32
+
+parts_33
+
+parts_34
+
+
+import parts_35_5
+
+#ファイル移動
+parts_35_5
+
+print("アイテム予算を出力します")
+import parts_35
+
+parts_35
+
+
+print("集計シートに出力")
+import parts_38
+
+parts_38
