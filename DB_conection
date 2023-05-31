@@ -1,0 +1,37 @@
+import pyodbc
+
+# データベースに接続する
+driver = "SQL Server"
+server ="DESKTOP-RHAB086\SQLEXPRESS"
+database = 'Competitor'#競合店実績DB
+#database = 'TimeZoneSales', #時間帯売上実績DB
+trusted_connection = "yes"
+conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';POST=1433;Trusted_Connection='+trusted_connection+';')
+
+
+cursor = conn.cursor()
+def SELECT():
+  #cursor.execute('SELECT * FROM Competitor')
+  cursor.execute('SELECT * FROM Competitor WHERE Year = 2021 AND Month = 5 AND  = "川崎')
+  for row in cursor:
+    print(row)
+
+# データの登録
+def INSERT():
+  cursor.execute("INSERT INTO table_name(column1, column2) VALUES (?, ?)", value1, value2)
+  conn.commit()
+
+# データの更新
+def UPDATE():
+  cursor.execute("UPDATE table_name SET column1 = ? WHERE id = ?", new_value, id_value)
+  conn.commit()
+
+# データの削除
+def DELERT():
+  cursor.execute("DELETE FROM table_name WHERE id = ?", id_value)
+  conn.commit()
+  
+SELECT()
+
+# 接続を閉じる
+conn.close()
