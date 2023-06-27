@@ -1,0 +1,365 @@
+import pandas as pd
+import openpyxl as pyxl
+import os
+import datetime
+import calendar
+import numpy as np
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+file_1 = "C:/Users/fun-f/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/シフト管理/予実管理.xlsx"
+wb_1 = pyxl.load_workbook(file_1)
+ws_list = wb_1.sheetnames
+sales_ws = wb_1["実績データ"]
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+file_2 = "C:/Users/fun-f\Desktop/【MG用】ShopAnalisis.xlsx"
+wb_2 = pyxl.load_workbook(file_2)
+ws_ShopChart = wb_2["店舗カルテ"]
+
+
+shop_names_list = {
+  "FUN柏":[2,"柏",2],
+  "FUN千葉C-one":[3,"千葉",9],
+  "FUNスマーク伊勢崎":[4,"伊勢崎",16],
+  "FUNららぽーと富士見":[5,"富士見",37],
+  "FUNイオンレイクタウン":[6,"レイク",44],
+  "FUNららぽーと海老名":[7,"海老名",51],
+  "FUNイオンモールむさし村山":[8,"むさし",58],
+  "FUNららぽーと湘南平塚":[9,"平塚",65],
+  "FUNイオンモール名取":[10,"名取",72],
+  "FUNイオンモール大高":[11,"大高",79],
+  "FUNららぽーと愛知東郷":[12,"東郷町",86],
+  "FUNイオンモール太田":[13,"太田",93],
+  "FUNイオンモール水戸内原":[14,"水戸",100],
+  "FUNららぽーとEXPOCITY":[15,"EXPO",107],
+  "FUNラゾーナ川崎":[16,"川崎",114],
+  "FUNららぽーと新三郷":[17,"新三郷",121],
+  "FUNイオンモール幕張新都心":[18,"幕張",128],
+  "FUNイオンモール各務原":[19,"各務原",135],
+  "FUNららぽーと堺":[20,"堺",142],
+  
+  }
+
+for shop_name_list_ele in shop_names_list:
+  select_year = ws_ShopChart["C1"].value
+  select_shop = shop_name_list_ele
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  def sales_cal(select_year,select_shop):
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    shop_dic = {
+    "FUN柏":[2,"柏",2],
+    "FUN千葉C-one":[3,"千葉",9],
+    "FUNスマーク伊勢崎":[4,"伊勢崎",16],
+    "FUNららぽーと富士見":[5,"富士見",37],
+    "FUNイオンレイクタウン":[6,"レイク",44],
+    "FUNららぽーと海老名":[7,"海老名",51],
+    "FUNイオンモールむさし村山":[8,"むさし",58],
+    "FUNららぽーと湘南平塚":[9,"平塚",65],
+    "FUNイオンモール名取":[10,"名取",72],
+    "FUNイオンモール大高":[11,"大高",79],
+    "FUNららぽーと愛知東郷":[12,"東郷町",86],
+    "FUNイオンモール太田":[13,"太田",93],
+    "FUNイオンモール水戸内原":[14,"水戸",100],
+    "FUNららぽーとEXPOCITY":[15,"EXPO",107],
+    "FUNラゾーナ川崎":[16,"川崎",114],
+    "FUNららぽーと新三郷":[17,"新三郷",121],
+    "FUNイオンモール幕張新都心":[18,"幕張",128],
+    "FUNイオンモール各務原":[19,"各務原",135],
+    "FUNららぽーと堺":[20,"堺",142],
+    
+    }
+    
+
+
+
+    file_2 = "C:/Users/fun-f\Desktop/【MG用】ShopAnalisis.xlsx"
+    wb_2 = pyxl.load_workbook(file_2)
+    
+    data_only_file1 = pyxl.load_workbook(file_1,data_only=True)
+    
+    r_only_ws = data_only_file1["実績データ"]
+    competitor = pd.read_excel(file_1,sheet_name="競合店実績")
+    df_compe = pd.DataFrame(competitor)
+    
+    key_data = df_compe[df_compe["店舗特性"] == shop_dic[select_shop][1]]
+    
+    brand_list = np.unique(key_data["BRAND"].values)
+    print(brand_list)
+    
+    compe = wb_2["setting_data"]
+    Brand1 = compe.cell(shop_dic[select_shop][0],77).value#店舗Noを取得
+    Brand2 = compe.cell(shop_dic[select_shop][0],78).value
+    Brand3 = compe.cell(shop_dic[select_shop][0],79).value
+    Brand4 = compe.cell(shop_dic[select_shop][0],80).value
+    
+    Brand_list1 = [
+      
+      Brand1,
+      Brand2,
+      Brand3,
+      Brand4,
+      
+    ]
+    
+    brand1_data = key_data[key_data["BRAND"] == Brand_list1[0] ]
+    brand2_data = key_data[key_data["BRAND"] == Brand_list1[1] ]
+    brand3_data = key_data[key_data["BRAND"] == Brand_list1[2] ]
+    brand4_data = key_data[key_data["BRAND"] == Brand_list1[3] ]
+    
+    Brand_list2 = [brand1_data,brand2_data,brand3_data,brand4_data]
+    print("チェック１",Brand_list1)
+
+
+    ws_ShopChart = wb_2["店舗カルテ"]
+
+    #初期値
+    ini_year = 2022
+    ini_month = 1
+    ini_day = 1
+
+    year_pitch = 365
+    #月の日数を格納
+    last_weekday1,last_day1 = calendar.monthrange(ini_year + 1,1)
+    last_weekday2,last_day2 = calendar.monthrange(ini_year + 1,2)
+    last_weekday3,last_day3 = calendar.monthrange(ini_year,3)
+    last_weekday4,last_day4 = calendar.monthrange(ini_year,4)
+    last_weekday5,last_day5 = calendar.monthrange(ini_year,5)
+    last_weekday6,last_day6 = calendar.monthrange(ini_year,6)
+    last_weekday7,last_day7 = calendar.monthrange(ini_year,7)
+    last_weekday8,last_day8 = calendar.monthrange(ini_year,8)
+    last_weekday9,last_day9 = calendar.monthrange(ini_year,9)
+    last_weekday10,last_day10 = calendar.monthrange(ini_year,10)
+    last_weekday11,last_day11 = calendar.monthrange(ini_year,11)
+    last_weekday12,last_day12 = calendar.monthrange(ini_year,12)
+
+
+    month_list = [
+      # last_day1,
+      # last_day2,
+      last_day3,
+      last_day4,
+      last_day5,
+      last_day6,
+      last_day7,
+      last_day8,
+      last_day9,
+      last_day10,
+      last_day11,
+      last_day12,
+      last_day1,
+      last_day2,
+      
+    ]
+    
+    months = [3,4,5,6,7,8,9,10,11,12,1,2]
+
+    #今日の日付データを取得
+    
+    counter = 1
+    for month_i,month_j in zip(months,month_list):
+      #today = datetime.datetime.today()
+      # year = today.year
+      # month = today.month
+      # to_weekday ,tomonth_last_day = calendar.monthrange(year,month)
+      # day = today.day
+      
+      if month_i <= 2:
+        
+        year = select_year + 1
+      
+      else:
+
+        year = select_year
+      month = month_i
+      to_weekday ,tomonth_last_day = calendar.monthrange(year,month)
+
+        
+      
+      select_day = str(year) + "-" + str(month).zfill(2) + "-" + str(month_j) + " 00:00:00"
+      print(select_day)
+      #day = to_day.day
+
+      y_diff = year - ini_year
+      y_diff_days = y_diff * year_pitch
+      day_diff = tomonth_last_day - month_j#day
+
+
+      sum_list = [y_diff_days - day_diff]
+
+      for m_n in range(0,month):
+        print(m_n)
+        sum_list.append(month_list[m_n])
+        
+
+      total_diff = sum(sum_list)
+
+      inital_1 = 4
+      #last_weekday,last_day = calendar.monthrange(2022,2)  
+      
+      all_buget_list = []
+      all_sales_vale_list = []
+      all_cust_list = []
+      all_quantity_list = []                                       
+    
+      buget_list = []
+      sales_vale_list = []
+      cust_list = []
+      quantity_list = []
+      
+
+      for i_n in range(total_diff - month_j,total_diff):
+        day_elemennts = sales_ws["A" + str(inital_1 + i_n) ].value
+        elements_1 = sales_ws.cell(i_n + inital_1,shop_dic[select_shop][2]).value
+        elements_2 = sales_ws.cell(i_n + inital_1,shop_dic[select_shop][2]+1).value
+        elements_3 = sales_ws.cell(i_n + inital_1,shop_dic[select_shop][2]+2).value
+        elements_4 = sales_ws.cell(i_n + inital_1,shop_dic[select_shop][2]+3).value
+        
+        if elements_1 == None: 
+          elements_1 = 0
+          
+          
+          
+        if elements_2 == None: 
+          elements_2 = 0  
+          
+        if elements_3 == None: 
+          elements_3 = 0 
+          
+        if elements_4 == None: 
+          elements_4 = 0
+                                                                                              
+        all_elements_1 = r_only_ws.cell(i_n + inital_1,163).value
+        all_elements_2 = r_only_ws.cell(i_n + inital_1,164).value
+        all_elements_3 = r_only_ws.cell(i_n + inital_1,165).value
+        all_elements_4 = r_only_ws.cell(i_n + inital_1,166).value
+        
+        if all_elements_1 == None: 
+          all_elements_1 = 0
+          
+        if all_elements_2 == None: 
+          all_elements_2 = 0  
+          
+        if all_elements_3 == None: 
+          all_elements_3 = 0 
+          
+        if all_elements_4 == None: 
+          all_elements_4 = 0
+        
+        print(elements_1,elements_2,elements_3,elements_4)
+        print(all_elements_1,all_elements_2,all_elements_3,all_elements_4)
+        print(all_elements_1)
+        
+        # if all_elements_1 != None :
+        #   all_buget_list.append(int(all_elements_1))
+        #   all_sales_vale_list.append(int(all_elements_2))
+        #   all_cust_list.append(int(all_elements_3))
+        #   all_quantity_list.append(int(all_elements_4))
+          
+
+        # if elements_1 != None: 
+          
+        all_buget_list.append(int(all_elements_1))
+        all_sales_vale_list.append(int(all_elements_2))
+        all_cust_list.append(int(all_elements_3))
+        all_quantity_list.append(int(all_elements_4))
+        
+        
+        buget_list.append(int(elements_1))
+        sales_vale_list.append(int(elements_2))
+        cust_list.append(int(elements_3))
+        quantity_list.append(int(elements_4))
+
+      print(sum(sales_vale_list))
+      
+      all_sum_buget = sum(all_buget_list)
+      all_sum_value = sum(all_sales_vale_list)
+      all_sum_cust = sum(all_cust_list)
+      all_sum_quantity = sum(all_quantity_list)
+      
+      sum_buget = sum(buget_list)
+      sum_value = sum(sales_vale_list)
+      sum_cust = sum(cust_list)
+      sum_quantity = sum(quantity_list)
+      
+      #全店実績
+      #予算出力
+      ws_ShopChart.cell(37, 4 + counter).value = all_sum_buget
+      
+      #売上出力
+      ws_ShopChart.cell(38, 4 + counter).value = all_sum_value
+      
+      #客数出力
+      ws_ShopChart.cell(39, 4 + counter).value = all_sum_cust
+      
+      #点数出力
+      ws_ShopChart.cell(40, 4 + counter).value = all_sum_quantity
+      
+      
+      #店別実績
+      #予算出力
+      ws_ShopChart.cell(47, 4 + counter).value = sum_buget
+      
+      #売上出力
+      ws_ShopChart.cell(48, 4 + counter).value = sum_value
+      
+      #客数出力
+      ws_ShopChart.cell(49, 4 + counter).value = sum_cust
+      
+      #点数出力
+      ws_ShopChart.cell(50, 4 + counter).value = sum_quantity
+      
+      #競合店実績
+      brand1_filter = brand1_data[(brand1_data["年"] == year) & (brand1_data["月"] == month_i)]
+      
+      brand2_filter = brand2_data[(brand2_data["年"] == year) & (brand2_data["月"] == month_i)]
+      
+      brand3_filter = brand3_data[(brand3_data["年"] == year) & (brand3_data["月"] == month_i)]
+      
+      brand4_filter = brand4_data[(brand4_data["年"] == year) & (brand4_data["月"] == month_i)]
+      
+      print(brand2_data)
+      
+      #売上実績
+      
+    
+      ws_ShopChart.cell(55, 4 + counter).value = sum(brand1_filter["売上実績"].values)
+      
+      ws_ShopChart.cell(56, 4 + counter).value = sum(brand2_filter["売上実績"].values)
+      
+      ws_ShopChart.cell(57, 4 + counter).value = sum(brand3_filter["売上実績"].values)
+      
+      ws_ShopChart.cell(58, 4 + counter).value = sum(brand4_filter["売上実績"].values)
+      
+      #客数
+      
+      ws_ShopChart.cell(60, 4 + counter).value = sum(brand1_filter["客数"].values)
+      
+      ws_ShopChart.cell(61, 4 + counter).value = sum(brand2_filter["客数"].values)
+      
+      ws_ShopChart.cell(62, 4 + counter).value = sum(brand3_filter["客数"].values)
+      
+      ws_ShopChart.cell(63, 4 + counter).value = sum(brand4_filter["客数"].values)
+      
+      counter += 1
+      
+    #BRAND名
+    
+    ws_ShopChart["B3"].value = str(select_shop)
+    ws_ShopChart.cell(55, 3).value = Brand1
+    ws_ShopChart.cell(56, 3).value = Brand2
+    ws_ShopChart.cell(57, 3).value = Brand3
+    ws_ShopChart.cell(58, 3).value = Brand4
+    
+    wb_2.save("C:/Users/fun-f/Desktop/店舗カルテ/【MG用】 " + str(year) + " " + str(select_shop) + " ShopAnalisis.xlsx")
+    #"C:/Users/fun-f/Desktop/店舗カルテ"
+      
+      
+
+
+  sales_cal(select_year,select_shop)
+
+
+
+
