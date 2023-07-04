@@ -1,0 +1,217 @@
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#競合店実績を取込
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+from itertools import count
+from numpy import append
+import openpyxl as pyxl
+import os
+import pandas as pd
+import datetime
+
+#from sklearn import config_context
+#file_path = "C:/Users/fun-f/Desktop/analysis/competitor/【全店集計】2022 3月競合店実績分析 -MAIN- - コピー.xlsx"
+#file_path = "C:/Users/fun-f/Desktop/analysis/competitor/【全店集計】2022 7月競合店実績分析 -MAIN- (1).xlsx"
+#file_path = "C:/Users/fun-f/Desktop/analysis/competitor/【全店集計】2022 12月競合店実績分析 -MAIN- (2).xlsx"
+#file_path = "C:/Users/fun-f/Desktop/analysis/competitor/【全店集計】2023 1月競合店実績分析 -MAIN- (6).xlsx"
+file_path = "C:/Users/fun-f/Desktop/analysis/competitor/【全店集計】2023 5月競合店実績分析 -MAIN- (2).xlsx"
+#"C:\Users\fun-f\Desktop\analysis\competitor\【全店集計】2023 5月競合店実績分析 -MAIN- (2).xlsx"
+#OUTPUT_FILE = "C:/Users/fun-f/Desktop/Competitor_DataBase.xlsx"
+OUTPUT_FILE = "C:/Users/fun-f/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/シフト管理/予実管理.xlsx"
+
+brand_list = [
+  "AN",
+  "AO",
+  "AP",
+  "AQ",
+  "AR",
+]
+
+data_col_list = [
+  
+  "AK",#日付
+  "AL",#曜日
+  "AM",#曜日特性
+  "AN",#以下売上
+  "AO",
+  "AP",
+  "AQ",
+  "AR",
+  "AS",#以下客数
+  "AT",
+  "AU",
+  "AV",
+  "AW",
+  
+]
+
+
+tenpo = [
+    ["01001008 FUN柏","柏"],
+    ["01001009 FUN千葉C-one","千葉"],
+    ["01001028 FUNスマーク伊勢崎","伊勢崎"],
+    # ["01001032 FUNララガーデン長町","長町"],
+    # ["01001033 FUNららぽーとTOKYO-BAY","船橋"],
+    ["01001034 FUNららぽーと富士見","富士見"],
+    ["01001036 FUNイオンレイクタウン","レイク"],
+    ["01001038 FUNららぽーと海老名","海老名"],
+    ["01001039 FUNイオンモールむさし村山","むさし"],
+    ["01001040 FUNららぽーと湘南平塚","平塚"],
+    ["01001041 FUNイオンモール名取","名取"],
+    ["01001042 FUNイオンモール大高","大高"],
+    ["01001043 FUNららぽーと愛知東郷","東郷町"],
+    ["01001044 FUNイオンモール太田","太田"],
+    ["01001045 FUNイオンモール水戸内原","水戸"],
+    ["01001046 FUNららぽーとEXPOCITY","エキスポ"],
+    ["01001047 FUNラゾーナ川崎プラザ","川崎"],
+    ["01001048 FUNららぽーと新三郷","新三郷"],
+    ["01001049 FUNイオンモール幕張新都心","幕張"],
+    ["01001050 FUNイオンモール各務原","各務原"],
+    ["01001051 FUNららぽーと堺","堺"],
+    
+]
+#アウトプットファイルを読み込み
+out_wb = pyxl.load_workbook(OUTPUT_FILE)
+#out_ws = out_wb["DATA_BASE"]
+out_ws = out_wb["競合店実績"]
+
+
+
+#抽出データ
+wb = pyxl.load_workbook(file_path,data_only=True)
+
+year = 2023
+month = 5
+
+for shop_name in tenpo:
+  sheet_name = shop_name[1]
+
+  ws = wb[str(sheet_name)]
+  BRAND1 = ws[brand_list[0] + str(17)].value
+  BRAND2 = ws[brand_list[1] + str(17)].value
+  BRAND3 = ws[brand_list[2] + str(17)].value
+  BRAND4 = ws[brand_list[3] + str(17)].value
+  BRAND5 = ws[brand_list[4] + str(17)].value
+
+  print(BRAND1)
+  print(BRAND2)
+  print(BRAND3)
+  print(BRAND4)
+  print(BRAND5)
+  day_n = 0#初期
+  element2 = 1  
+
+  data_list = []
+  for i in range(18,60):
+    element1 = ws[data_col_list[0] + str(i)].value
+
+    
+    if element1 == "-":
+      print("non")
+
+      
+    elif int(element1) > 0:
+      
+      #【 ブランド１ 】
+      Brand1 = pd.DataFrame([BRAND1],columns=["BRAND"])
+      Shop_type1 = pd.DataFrame([sheet_name],columns=["店舗特性"])
+      year1 = pd.DataFrame([year],columns=["年"])
+      month1 = pd.DataFrame([month],columns=["月"])
+      day_element1 = pd.DataFrame([element2],columns=["日付"])
+      week_of_day1 = pd.DataFrame([ws[data_col_list[1] + str(i)].value],columns=["曜日"])
+      week_type1 = pd.DataFrame([ws[data_col_list[2] + str(i)].value],columns=["曜日特性"])
+      sales_value1 = pd.DataFrame([ws[data_col_list[3] + str(i)].value],columns=["売上実績"])
+      customer1 = pd.DataFrame([ws[data_col_list[8] + str(i)].value],columns=["客数"])
+      concat_data1 = pd.concat([Brand1,Shop_type1,year1,month1,day_element1,week_of_day1,week_type1,sales_value1,customer1],axis=1) 
+      data_list.append(concat_data1)
+
+      
+      #【 ブランド2 】
+      Brand2 = pd.DataFrame([BRAND2],columns=["BRAND"])
+      Shop_type2 = pd.DataFrame([sheet_name],columns=["店舗特性"])
+      year2 = pd.DataFrame([year],columns=["年"])
+      month2 = pd.DataFrame([month],columns=["月"])
+      day_element2 = pd.DataFrame([element2],columns=["日付"])  
+      week_of_day2 = pd.DataFrame([ws[data_col_list[1] + str(i)].value],columns=["曜日"])
+      week_type2 = pd.DataFrame([ws[data_col_list[2] + str(i)].value],columns=["曜日特性"])
+      sales_value2 = pd.DataFrame([ws[data_col_list[3 + 1] + str(i)].value],columns=["売上実績"])
+      customer2 = pd.DataFrame([ws[data_col_list[8 + 1] + str(i)].value],columns=["客数"])
+      concat_data2 = pd.concat([Brand2,Shop_type2,year2,month2,day_element2,week_of_day2,week_type2,sales_value2,customer2],axis=1) 
+      data_list.append(concat_data2)
+      
+      #【 ブランド3 】
+      Brand3 = pd.DataFrame([BRAND3],columns=["BRAND"])
+      Shop_type3 = pd.DataFrame([sheet_name],columns=["店舗特性"])
+      year3 = pd.DataFrame([year],columns=["年"])
+      month3 = pd.DataFrame([month],columns=["月"])
+      day_element3 = pd.DataFrame([element2],columns=["日付"])   
+      week_of_day3 = pd.DataFrame([ws[data_col_list[1] + str(i)].value],columns=["曜日"])
+      week_type3 = pd.DataFrame([ws[data_col_list[2] + str(i)].value],columns=["曜日特性"])
+      sales_value3 = pd.DataFrame([ws[data_col_list[3 + 2] + str(i)].value],columns=["売上実績"])
+      customer3 = pd.DataFrame([ws[data_col_list[8 + 2] + str(i)].value],columns=["客数"])
+      concat_data3 = pd.concat([Brand3,Shop_type3,year3,month3,day_element3,week_of_day3,week_type3,sales_value3,customer3],axis=1) 
+      data_list.append(concat_data3)
+      
+      #【 ブランド4 】
+      Brand4 = pd.DataFrame([BRAND4],columns=["BRAND"])
+      Shop_type4 = pd.DataFrame([sheet_name],columns=["店舗特性"])
+      year4 = pd.DataFrame([year],columns=["年"])
+      month4 = pd.DataFrame([month],columns=["月"])
+      day_element4 = pd.DataFrame([element2 ],columns=["日付"])  
+      week_of_day4 = pd.DataFrame([ws[data_col_list[1] + str(i)].value],columns=["曜日"])
+      week_type4 = pd.DataFrame([ws[data_col_list[2] + str(i)].value],columns=["曜日特性"])
+      sales_value4 = pd.DataFrame([ws[data_col_list[3 + 3] + str(i)].value],columns=["売上実績"])
+      customer4 = pd.DataFrame([ws[data_col_list[8 + 3] + str(i)].value],columns=["客数"])
+      concat_data4 = pd.concat([Brand4,Shop_type4,year4,month4,day_element4,week_of_day4,week_type4,sales_value4,customer4],axis=1) 
+      data_list.append(concat_data4)
+      
+      #【 ブランド5 】
+      Brand5 = pd.DataFrame([BRAND5],columns=["BRAND"])
+      Shop_type5 = pd.DataFrame([sheet_name],columns=["店舗特性"])
+      year5 = pd.DataFrame([year],columns=["年"])
+      month5 = pd.DataFrame([month],columns=["月"])
+      day_element5 = pd.DataFrame([element2] ,columns=["日付"])  
+      week_of_day5 = pd.DataFrame([ws[data_col_list[1] + str(i)].value],columns=["曜日"])
+      week_type5 = pd.DataFrame([ws[data_col_list[2] + str(i)].value],columns=["曜日特性"])
+      sales_value5 = pd.DataFrame([ws[data_col_list[3 + 4] + str(i)].value],columns=["売上実績"])
+      customer5 = pd.DataFrame([ws[data_col_list[8 + 4] + str(i)].value],columns=["客数"])
+      concat_data5 = pd.concat([Brand5,Shop_type5,year5,month5,day_element5,week_of_day5,week_type5,sales_value5,customer5],axis=1) 
+      data_list.append(concat_data5)
+      
+      
+      
+      element2 += 1
+  
+  
+  concat_data_list = pd.concat(data_list)  
+  concat_data_list2 = concat_data_list[concat_data_list["BRAND"].values != None ]  
+  print(concat_data_list2)    
+  counter = (len(concat_data_list2))
+  
+  #データを抽出
+  last_low = out_ws.max_row + 1
+  print(last_low)
+  range_count = (int(counter) + 1)
+  
+  for sheet_no,data_no in zip(range(0,range_count),concat_data_list2.values):
+    print(data_no)
+    out_ws["A" + str(last_low+sheet_no)].value = data_no[0]
+    out_ws["B" + str(last_low+sheet_no)].value = data_no[1]
+    out_ws["C" + str(last_low+sheet_no)].value = data_no[2]
+    out_ws["D" + str(last_low+sheet_no)].value = data_no[3]
+    out_ws["E" + str(last_low+sheet_no)].value = data_no[4]
+    out_ws["F" + str(last_low+sheet_no)].value = data_no[5]
+    out_ws["G" + str(last_low+sheet_no)].value = data_no[6]
+    out_ws["H" + str(last_low+sheet_no)].value = data_no[7]
+    out_ws["I" + str(last_low+sheet_no)].value = data_no[8]
+    
+    
+    
+#★★★★★★★★
+out_wb.save(OUTPUT_FILE)
+#wb.close()
+#★★★★★★★★
+    
+  
+  
+    
