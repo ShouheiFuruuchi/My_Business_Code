@@ -1,0 +1,367 @@
+import pandas as pd
+import openpyxl as pyxl
+import numpy as np
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
+import os
+from pathlib import Path
+import shutil
+from operator import itemgetter
+import datetime
+
+today = datetime.datetime.today()
+add = datetime.timedelta(days=1)
+
+select_Day = today + add
+
+y = select_Day.year
+m = select_Day.month
+d = select_Day.day
+
+#指定日付
+SELECT_DAY = str(y) + "/" + str(m) + "/" + str(d)
+
+
+file_path_MainList = "C:/Users/fun-f/Desktop/download_dir/商品マスタ.csv"
+file_path = "C:/Users/fun-f/Desktop/download_dir/10017505.csv"
+file_path_inventory = "C:/Users/fun-f/Desktop/download_dir/在庫一覧_.csv"
+#output_file = "C:/Users/fun-f/Desktop/売変リスト.xlsx"
+output_file = "C:/Users/fun-f/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務フォルダ/⑥システム部/商品マスタ/売変リスト.xlsx"
+
+shoplist = [
+  'FUN柏',
+  'FUN千葉C-one',
+  'FUNスマーク伊勢崎',
+  'FUNららぽーと富士見',
+  'FUNイオンレイクタウン',
+  'FUNららぽーと海老名',
+  'FUNイオンモールむさし村山',
+  'FUNららぽーと湘南平塚',
+  'FUNイオンモール名取',
+  'FUNイオンモール大高',
+  'FUNららぽーと愛知東郷',
+  'FUNイオンモール太田',
+  'FUNイオンモール水戸内原',
+  'FUNららぽーとEXPOCITY',
+  'FUNラゾーナ川崎プラザ',
+  'FUNららぽーと新三郷',
+  'FUNイオンモール幕張新都心',
+  'FUNイオンモール各務原',
+  'FUNららぽーと堺',
+]
+
+#ーーーーーーーー前回ダウンロードファイル削除ーーーーーーーーーー
+dr_files = 'C:/Users/fun-f/Desktop/download_dir'
+dr_read = os.listdir(dr_files)
+
+print(dr_read)
+
+for file_name in dr_read:
+  del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+  os.remove(del_f_path)#dataf内のファイルの削除
+  
+
+def scr():
+  
+  url = 'http://tri.hanbai-net.com/system/Login.aspx'
+  
+  # options = Options()
+  download_dir = "C:/Users/fun-f/Desktop/download_dir"
+  
+
+
+  # options.add_experimental_option("prefs", {
+  #   "download.default_directory":download_dir, #ダウンロード先のフォルダ
+  #   "plugins.always_open_pdf_externally": True              #PDFをブラウザのビューワーで開かせない
+  # })
+
+  driver = webdriver.Chrome("C:/Users/fun-f/chromedriver.exe")#2021 0724
+  
+  
+  #driver = webdriver.Chrome(ChromeDriverManager().install())
+  driver.get(url)
+
+
+  id_1 = 'trinityadmin'
+  id_2 = 'AdminTrinity'
+
+  loginid_1 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtUserCode"]')
+  loginid_2 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtPassword"]')
+
+  loginid_1.send_keys(id_1)#ユーザーIDを入力
+  loginid_2.send_keys(id_2)#パスワードを入力
+
+
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnLogin"]').click() 
+  #ログインボタンをクリック
+
+  driver.get('http://tri.hanbai-net.com/system/00000000.aspx')
+  
+
+  #所品マスタ
+  #///////////////////////////////////////////////////////////////////////////////////
+  driver.get("http://tri.hanbai-net.com/system/10017501.aspx?id=010199")
+  
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()
+  
+  time.sleep(10)
+  
+  filelists = []
+  def MOVE(file_name):
+    for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+        base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+        if ext == '.csv':#拡張子csvが一致した場合…
+          
+            if base == file_name:
+                filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+                #print("file:{},csv:{}" .format(file,csv))
+                filelists.sort(key=itemgetter(0), reverse=True)#
+                MAX_CNT = 0
+                for i, file in enumerate(filelists):
+                    if i > MAX_CNT-1:
+                        print(file[0])
+                        #file_1 = os.rename(i[0], 'kasi.csv')
+                        os.rename(file[0], file_name + '.csv')
+                        shutil.move(file_name + '.csv',download_dir) 
+  try :
+    file_name = "商品マスタ"
+    MOVE(file_name) 
+    print(filelists[0])
+    
+  except IndexError:
+    print("リトライ")
+    time.sleep(10)
+    MOVE(file_name)  
+                                                
+  time.sleep(1)                
+  
+  #売価情報
+  #///////////////////////////////////////////////////////////////////////////////////
+  driver.get("http://tri.hanbai-net.com/system/10017505.aspx?id=0101")    
+  
+  
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()
+  
+  time.sleep(10)
+  
+  filelists = []
+  try :
+    file_name = "10017505"
+    MOVE(file_name) 
+    print(filelists[0])
+    
+  except IndexError:
+    print("リトライ")
+    time.sleep(10)
+    MOVE(file_name)  
+                                                
+  time.sleep(1)     
+  
+  #在庫一覧
+  #///////////////////////////////////////////////////////////////////////////////////
+  driver.get("http://tri.hanbai-net.com/system/21026001.aspx?id=010199")
+  
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()
+  
+  time.sleep(10)
+  
+  filelists = []
+  try :
+    file_name = "在庫一覧_"
+    MOVE(file_name) 
+    print(filelists[0])
+    
+  except IndexError:
+    print("リトライ")
+    time.sleep(10)
+    MOVE(file_name)  
+                                                
+  time.sleep(1)    
+  
+
+scr()  
+  
+#在庫リストを作成
+
+inventory_list = pd.read_csv(file_path_inventory,encoding="cp932")
+df_inventory_list = pd.DataFrame(inventory_list)
+
+
+
+inv_item_cd = pd.DataFrame(df_inventory_list["商品コード"].values,columns=["商品CD"])
+
+inv_item_cd_unq = np.unique(inv_item_cd)
+
+inv_item_name = pd.DataFrame(df_inventory_list["商品名"].values,columns=["商品名"])
+inv_item_color = pd.DataFrame(df_inventory_list["色名"].values,columns=["色名"])
+inv_item_size = pd.DataFrame(df_inventory_list["サイズ名"].values,columns=["SIZE"])
+inv_item_inventory = pd.DataFrame(df_inventory_list["現在数量"].values,columns=["現在数量"])
+BASE_inventory_list = pd.concat([inv_item_cd,inv_item_name,inv_item_color,inv_item_size,inv_item_inventory],axis=1)
+
+INVENTORY_LIST = []
+for pic_cd in inv_item_cd_unq:
+  select_row = BASE_inventory_list[BASE_inventory_list["商品CD"] == pic_cd]
+  name = select_row["商品名"].values[0]
+  color = select_row["色名"].values[0]
+  size = select_row["SIZE"].values[0]
+  inventory = sum(select_row["現在数量"].values)
+  
+  create_row = pd.DataFrame({"商品CD":[str(pic_cd)[:10]],"商品名":[name],"色名":[color],"SIZE":[size],"現在数量":[inventory]})
+  print(inventory)
+  if inventory > 0 :
+    INVENTORY_LIST.append(create_row)
+
+CONCAT_INVENTORY_LIST = pd.concat(INVENTORY_LIST)   
+print("在庫",CONCAT_INVENTORY_LIST) 
+
+
+
+#売変リスト
+r_file = pd.read_csv(file_path,encoding="cp932")
+
+#========================================================================
+#メイン商品リストを作成
+r_MainList = pd.read_csv(file_path_MainList,encoding="cp932")
+
+df_MainList = pd.DataFrame(r_MainList)
+
+Main_itemCD = pd.DataFrame(df_MainList["商品コード"].values,columns=["商品CD"])
+Main_itenNAME = pd.DataFrame(df_MainList["商品名"].values,columns=["商品名"])
+Main_JANCD = pd.DataFrame(df_MainList["バーコード"].values,columns=["JANコード"])
+Main_PRICE = pd.DataFrame(df_MainList["標準価格"].values,columns=["価格"])
+Main_COLORCD = pd.DataFrame(df_MainList["カラーコード"].values,columns=["カラーCD"])
+Main_COLOR = pd.DataFrame(df_MainList["色名"].values,columns=["カラー"])
+Main_SIZECD = pd.DataFrame(df_MainList["サイズコード"].values,columns=["サイズCD"])
+Main_SIZE = pd.DataFrame(df_MainList["サイズ名"].values,columns=["サイズ"])
+
+ITEM_MAIN_LIST = pd.concat([Main_itemCD,Main_itenNAME,Main_JANCD,Main_COLORCD,Main_COLOR,Main_SIZECD,Main_SIZE,Main_PRICE],axis=1)
+
+#========================================================================
+wb = pyxl.load_workbook(output_file)
+ws = wb["Sheet1"]
+
+#出力ファイルのクリア
+max_row = ws.max_row
+
+print(max_row)
+
+for row_n in range(max_row + 1):
+  ws["A" + str(2 + row_n )].value = ""
+  ws["B" + str(2 + row_n )].value = ""
+  ws["C" + str(2 + row_n )].value = ""
+  ws["D" + str(2 + row_n )].value = ""
+  ws["E" + str(2 + row_n )].value = ""
+  ws["F" + str(2 + row_n )].value = ""
+  ws["G" + str(2 + row_n )].value = ""
+  ws["H" + str(2 + row_n )].value = ""
+  ws["I" + str(2 + row_n )].value = ""
+ 
+  
+wb.save(output_file) 
+
+print("クリア完了")
+
+wb = pyxl.load_workbook(output_file)
+ws = wb["Sheet1"] 
+
+
+df_file = pd.DataFrame(r_file)
+                      
+
+ITEM_cd = pd.DataFrame({"商品CD":[df_file["COL002"].values]})
+ITEM_name = pd.DataFrame({"商品名":[df_file["COL004"].values]})
+JAN_cd = pd.DataFrame({"JANコード":[df_file["COL003"].values]})
+
+#商品ユニークリスト
+#UNQ_list = np.unique(pd.DataFrame(df_file["商品番号"].values,columns=["商品番号"]))
+
+#item_cd = pd.DataFrame(df_file["商品番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号"])
+item_cd = pd.DataFrame(df_file["COL002"].values,columns=["商品番号"])#商品CD
+item_name = pd.DataFrame(df_file["COL004"].values,columns=["商品名"])
+JAN_cd = pd.DataFrame(df_file["COL003"].values,columns=["JANコード"])
+#item_color = pd.DataFrame(df_file["商品番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号"])
+#item_quantity = pd.DataFrame(df_file['販売個数(合計)'].values,columns=["数量"])
+item_price = pd.DataFrame(df_file['COL009'].values,columns=["価格"])
+period = pd.DataFrame(df_file['COL098'].values,columns=["期間"])
+
+concat_list = pd.DataFrame(pd.concat([item_cd,item_name,JAN_cd,item_price,period],axis=1))
+
+sort_concat_list = concat_list[concat_list["期間"].values <= SELECT_DAY + "  0:00:00"]
+
+JAN_cd_list = np.unique(sort_concat_list["JANコード"].values)
+
+
+
+item_list = []
+for i in ITEM_MAIN_LIST.values:
+  match_element = sort_concat_list[sort_concat_list["JANコード"] == i[2]]
+  if len(match_element) > 0:
+    match_element_price = match_element.sort_values("期間",ascending=True).values[0]
+    
+    Main_itemCD2 = pd.DataFrame([i[0]],columns=["商品CD"])
+    Main_itenNAME2 = pd.DataFrame([i[1]],columns=["商品名"])
+    Main_JANCD2 = pd.DataFrame([i[2]],columns=["JANコード"])
+    Main_PRICE2 = pd.DataFrame([match_element_price[3]],columns=["価格"])
+    Main_COLORCD2 = pd.DataFrame([i[3]],columns=["カラーCD"])
+    Main_COLOR2 = pd.DataFrame([i[4]],columns=["カラー"])
+    Main_SIZECD2 = pd.DataFrame([i[5]],columns=["サイズCD"])
+    Main_SIZE2 = pd.DataFrame([i[6]],columns=["サイズ"])
+
+    ITEM_MAIN_LIST2 = pd.concat([Main_itemCD2,Main_itenNAME2,Main_JANCD2,Main_COLORCD2,Main_COLOR2,Main_SIZECD2,Main_SIZE2,Main_PRICE2],axis=1)
+    
+    item_list.append(ITEM_MAIN_LIST2)
+    
+  else:
+    Main_itemCD2 = pd.DataFrame([i[0]],columns=["商品CD"])
+    Main_itenNAME2 = pd.DataFrame([i[1]],columns=["商品名"])
+    Main_JANCD2 = pd.DataFrame([i[2]],columns=["JANコード"])
+    Main_PRICE2 = pd.DataFrame([i[7]],columns=["価格"])
+    Main_COLORCD2 = pd.DataFrame([i[3]],columns=["カラーCD"])
+    Main_COLOR2 = pd.DataFrame([i[4]],columns=["カラー"])
+    Main_SIZECD2 = pd.DataFrame([i[5]],columns=["サイズCD"])
+    Main_SIZE2 = pd.DataFrame([i[6]],columns=["サイズ"])
+
+    ITEM_MAIN_LIST2 = pd.concat([Main_itemCD2,Main_itenNAME2,Main_JANCD2,Main_COLORCD2,Main_COLOR2,Main_SIZECD2,Main_SIZE2,Main_PRICE2],axis=1)
+    
+    item_list.append(ITEM_MAIN_LIST2)  
+
+CREATE_MAIN_LIST = pd.concat(item_list,axis=0)  
+print(CREATE_MAIN_LIST)
+
+
+UNQ_CONCAT_INVENTORY_LIST = np.unique(CONCAT_INVENTORY_LIST["商品CD"].values)
+print(CREATE_MAIN_LIST["商品CD"])
+
+COMPE_MAIN_LIST = []
+for match_cd in UNQ_CONCAT_INVENTORY_LIST:
+  
+  MATCH_ROW = CREATE_MAIN_LIST[CREATE_MAIN_LIST["商品CD"] == int(match_cd)]
+
+  COMPE_MAIN_LIST.append(MATCH_ROW)
+
+CONCAT_COMPE_MAIN_LIST = pd.concat(COMPE_MAIN_LIST)
+
+    
+print(CONCAT_COMPE_MAIN_LIST)
+row_no = 0 
+for i2 in CONCAT_COMPE_MAIN_LIST.values:
+  
+  
+  ws["A" + str(2 + row_no)].value = i2[0]
+  ws["B" + str(2 + row_no)].value = i2[1]
+  ws["C" + str(2 + row_no)].value = str(i2[1]) + " / " + str(i2[4]) + " / " + str(i2[6])
+  ws["D" + str(2 + row_no)].value = i2[7]
+  ws["E" + str(2 + row_no)].value = i2[2]
+  ws["F" + str(2 + row_no)].value = i2[3] 
+  ws["G" + str(2 + row_no)].value = i2[4]
+  ws["H" + str(2 + row_no)].value = i2[5]
+  ws["I" + str(2 + row_no)].value = i2[6]
+  
+  
+  row_no += 1
+
+  #names = datas["商品名"].values[0]
+    
+wb.save(output_file)    
