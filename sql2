@@ -1,0 +1,163 @@
+import pyodbc
+
+# データベースに接続する
+driver = "SQL Server"
+server ="FUN-PC119"
+database = 'StaffDataBase2023'#競合店実績DB
+#database = 'TimeZoneSales', #時間帯売上実績DB
+trusted_connection = "yes"
+conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';POST=1433;Trusted_Connection='+trusted_connection+';')
+
+
+cursor = conn.cursor()
+def SELECT():
+  #cursor.execute('SELECT * FROM Competitor')
+  cursor.execute('SELECT * FROM  StaffDataBase2023')
+  # for row in cursor:
+  #   #print(row)
+  #   print(row[0])
+  #   print(row[1])
+  #   print(row[2])
+  #   print(row[3])
+  #   ID = row[0]
+  #   Name = row[1]
+  #   Year = row[2]
+  #   Month = row[3]
+  #   Belong = row[4]
+  #   Section = row[5]
+  #   Position = row[6]
+  #   achievement_rate = row[7]
+  #   total_work_time = row[8]
+  #   total_work_day = row[9]
+  #   late_count = row[10]
+  #   absent_days = row[11]
+  #   early_leave_count = row[12]
+  #   create_time = row[13]
+  #   update_time  = row[14]   
+
+# データの登録
+#競合店実績を登録
+def INSERT_STAFFDATABASE(
+    ID,#ID
+    Name,#名前
+    Year,#年
+    Month,#月
+    Belong,#所属
+    Section,#担当
+    Position,#役職
+    achievement_rate,#平均達成率
+    total_work_time,#総労働時間
+    total_work_day, #出勤日数
+    late_count, #遅刻
+    absent_days, #欠勤
+    early_leave_count, #早退
+    create_time,#作成日時
+    update_time,#更新日時
+    
+     ):
+  
+    driver = "SQL Server"
+    server = "FUN-PC119"
+    database = "StaffDataBase2023_1" # 競合店実績DB
+    # database = "TimeZoneSales" # 時間帯売上実績DB
+    trusted_connection = "yes"
+
+    conn = pyodbc.connect('DRIVER=' + driver +
+                        ';SERVER=' + server +
+                        ';DATABASE=' + database +
+                        ';PORT=1433;' +
+                        'Trusted_Connection=' + trusted_connection + ';')
+
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO StaffDataBase2023_1(ID, Name, Year, Month, Belong, Section, Position, achievement_rate, total_work_time, total_work_day, late_count, absent_days, early_leave_count, create_time, update_time ) VALUES ('" +
+                str(ID) + "','" +
+                str(Name) + "','" +
+                str(Year) + "','" +
+                str(Month) + "','" +
+                str(Belong) + "','" +
+                str(Section) + "','" +
+                str(Position) + "','" +
+                str(achievement_rate) + "','" +
+                str(total_work_time) + "','" +
+                str(total_work_day) + "','" +
+                str(late_count) + "','" +
+                str(absent_days) + "','" +
+                str(early_leave_count) + "','" +
+                str(create_time) + "','" +
+                str(update_time) +
+                
+                "')")
+
+    conn.commit()
+    
+def INSERT_SALESEVALUATION(
+    ID,
+    Name,
+    Year,
+    Month,
+    Sales,
+    TotalScore,
+    Sales_Category1,
+    Sales_Category2,
+    Sales_Category3,
+    Sales_Category4,
+    Sales_Category5,
+    Sales_Category6,
+    Sales_Category7,
+    Sales_Category8,
+    Sales_Category9,
+    Sales_Category10,
+
+):  
+  driver = "SQL Server"
+  server = "FUN-PC119"
+  database = "StaffEvaluation" # 競合店実績DB
+  # database = "TimeZoneSales" # 時間帯売上実績DB
+  trusted_connection = "yes"
+
+  conn = pyodbc.connect('DRIVER=' + driver +
+                      ';SERVER=' + server +
+                      ';DATABASE=' + database +
+                      ';PORT=1433;' +
+                      'Trusted_Connection=' + trusted_connection + ';')
+
+  cursor = conn.cursor()
+  cursor.execute("INSERT INTO StaffEvaluation( ID,Name,Year,Month,Sales,TotalScore,Sales_Category1,Sales_Category2,Sales_Category3,Sales_Category4,Sales_Category5,Sales_Category6,Sales_Category7,Sales_Category8,Sales_Category9,Sales_Category10 ) VALUES ('" +
+              str(ID) + "','" +
+              str(Name) + "','" +
+              str(Year) + "','" +
+              str(Month) + "','" +
+              str(Sales) + "','" +
+              str(TotalScore) + "','" +
+              str(Sales_Category1) + "','" +
+              str(Sales_Category2) + "','" +
+              str(Sales_Category3) + "','" +
+              str(Sales_Category4) + "','" +
+              str(Sales_Category5) + "','" +
+              str(Sales_Category6) + "','" +
+              str(Sales_Category7) + "','" +
+              str(Sales_Category8) + "','" +
+              str(Sales_Category9) + "','" +
+              str(Sales_Category10) +
+              
+              "')")
+
+  conn.commit()
+
+
+def STAFF_EVA_DATA():
+  # データベースに接続する
+  driver = "SQL Server"
+  server ="FUN-PC119"
+  database = 'StaffEvaluation'#競合店実績DB
+  #database = 'TimeZoneSales', #時間帯売上実績DB
+  trusted_connection = "yes"
+  conn = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';DATABASE='+database+';POST=1433;Trusted_Connection='+trusted_connection+';')
+
+
+  cursor = conn.cursor()
+  #cursor.execute('SELECT * FROM Competitor')
+  cursor.execute('SELECT * FROM StaffEvaluation ')
+  for row in cursor:
+    print(row)
+  
