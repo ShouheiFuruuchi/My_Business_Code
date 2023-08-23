@@ -1,0 +1,988 @@
+import numpy as np
+import pandas as pd
+import os
+import math
+import re
+import datetime
+from operator import itemgetter
+
+import openpyxl as pyxl
+from selenium import webdriver
+import shutil
+import time
+from datetime import timedelta,date
+from posixpath import splitext
+
+from PIL import Image
+
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+item_category = {
+    "01":"OP",
+    "02":"CD",
+    "03":"JK",
+    "04":"KT",
+    "05":"CS",
+    "06":"CT",
+    "07":"BL",
+    "08":"SK",
+    "09":"PT",
+    "10":"TR",
+    "11":"INN",
+    "12":"SETUP",
+    "13":"ACC",
+  }
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+#WB指定
+
+tenpo_list = {
+
+  '柏':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[2]',
+  '千葉':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[3]',
+  '伊勢崎':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[4]',
+  '長町':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[5]',
+  'TOKYO-BAY':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[6]',
+  '富士見':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[7]',
+  '越谷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[8]',
+  '海老名':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[9]',
+  'むさし村山':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[10]',
+  '湘南平塚':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[11]',
+  '名取':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[12]',
+  '大高':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[13]',
+  '愛知東郷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[14]',
+  '太田':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[15]',
+  '水戸内原':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[16]',
+  'EXPOCITY':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[17]',
+  '川崎':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[18]',
+  '新三郷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[19]',
+  '幕張新都心':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[20]',
+  '各務原':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[21]'
+
+  }
+
+#---------------------------------------------------
+inventory_folder = "C:/Users/fun-f/Desktop/analysis/inventory"
+img_stock = "C:/Users/fun-f/Desktop/analysis/item_image_stock"
+img_stock_list = os.listdir(img_stock)
+# print("期間のSTART日を入力して下さい！")
+# print("例 20XX0101(20XX年1月1日の場合)")
+#period1 = tod + str(input())
+#period1 = str(input())
+period1 = datetime.date.today()
+print(period1)
+
+# y = period1[0:4]
+# m = period1[4:6]
+# d = period1[6:8]
+
+
+
+y = str(period1.year).zfill(4)
+m = str(period1.month).zfill(2)
+d = str(period1.day).zfill(2)
+print(y,m,d)
+
+ymd = datetime.datetime.strptime(str(y) + '-' + str(m) + '-' + str(d), '%Y-%m-%d')#period1を日付に変換
+print(ymd)
+_day = timedelta(days= 1)
+
+ReName = ymd + _day
+ReName_def = str(ReName.year) + str(ReName.month).zfill(2) + str(ReName.day).zfill(2)
+
+
+
+def download(period1):
+  
+  kasiwa = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[3]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[3]','柏','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[3]',"01001008"]
+  chiba = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[4]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[4]', '千葉','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[4]',"01001009"]
+  isesaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[9]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[9]','伊勢崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[9]',"01001028"]
+  nagamachi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[11]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[11]','長町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[11]',"01001032"]
+  hunabashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[12]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[12]','船橋','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[12]',"01001033"]
+  hujimi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[13]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[13]','富士見','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[13]',"01001034"]
+  reiku = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[15]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[15]','レイク','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[15]',"01001036"]
+  ebina = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[17]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[17]','海老名','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[17]',"01001038"]
+  musashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[18]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[18]','むさし','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[18]',"01001039"]
+  hiratuka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[19]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[19]','平塚','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[19]',"01001040"]
+  natori = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[20]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[20]','名取','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[20]',"01001041"]
+  otaka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[21]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[21]','大高','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[21]',"01001042"]
+  togocyo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[22]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[22]','東郷町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[22]',"01001043"]
+  ota = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[23]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[23]','太田','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[23]',"01001044"]
+  mito = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[24]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[24]','水戸','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[24]',"01001045"]
+  expo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[25]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[25]','EXPO','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[25]',"01001046"]
+  kawasaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[26]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[26]','川崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[26]',"01001047"]
+  sinmisato = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[27]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[27]','新三郷','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[27]',"01001048"]
+  makuhari = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[28]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[28]','幕張','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[28]',"01001049"]
+  kagamihara = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[29]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[29]','各務原','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[29]',"01001050"]
+
+  tenpo_list = [
+    kasiwa,
+    chiba,
+    isesaki,
+    nagamachi,
+    hunabashi,
+    hujimi,
+    reiku,
+    ebina,
+    musashi,
+    hiratuka,
+    natori,
+    otaka,
+    togocyo,
+    ota,
+    mito,
+    expo,
+    kawasaki,
+    sinmisato,
+    makuhari,
+    kagamihara
+    ]
+  
+  del_list = os.listdir(inventory_folder)
+  
+  for del_file in del_list:
+    os.remove(os.path.join(inventory_folder,del_file))
+    
+  del_list2 = os.listdir("C:/Users/fun-f/Desktop/analysis/delivery_list")
+  
+  for del_file2 in del_list2:  
+    os.remove(os.path.join("C:/Users/fun-f/Desktop/analysis/delivery_list",del_file2))
+    
+  del_list3 = os.listdir('C:/Users/fun-f/Desktop/analysis/data_folder')
+    
+  for del_file3 in del_list3:  
+    os.remove(os.path.join('C:/Users/fun-f/Desktop/analysis/data_folder',del_file3))
+  
+  #print("期間のSTART日を入力して下さい！")
+  #print("例 20XX0101(20XX年1月1日の場合)")
+  #period1 = tod + str(input())
+  #period1 = str(input())
+  
+  y = str(period1.year).zfill(4)
+  m = str(period1.month).zfill(2)
+  d = str(period1.day).zfill(2)
+  
+
+
+  # y = period1[0:4]
+  # m = period1[4:6]
+  # d = period1[6:8]
+
+  ymd = datetime.datetime.strptime(str(y) + '-' + str(m) + '-' + str(d), '%Y-%m-%d')#period1を日付に変換
+  print(ymd)
+  _day = timedelta(days= 1)
+  _day2 = timedelta(days= 6)
+  
+  ReName = ymd + _day
+  
+  period2_1st = ymd - _day2
+  
+  period1 = y+m+d
+  
+  y2 = str(period2_1st.year).zfill(4)
+  m2 = str(period2_1st.month).zfill(2)
+  d2 = str(period2_1st.day).zfill(2)
+  period2 = y2 + m2 + d2
+  
+  
+  
+  #point_week = date(int(y),int(m),int(d)).isocalendar().week
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  
+  #品番別の売上をダウンロードするプログラム
+  
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  
+  
+  url = 'http://tri.hanbai-net.com/system/Login.aspx'
+  driver = webdriver.Chrome("C:/Users/fun-f/chromedriver.exe")#2021 0724
+
+  id_1 = 'trinityadmin'
+  id_2 = 'AdminTrinity'
+
+  driver.get(url)
+
+  loginid_1 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtUserCode"]')
+  loginid_2 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtPassword"]')
+
+  loginid_1.send_keys(id_1)#ユーザーIDを入力
+  loginid_2.send_keys(id_2)#パスワードを入力
+
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnLogin"]').click() 
+  #ログインボタンをクリック
+
+  driver.get('http://tri.hanbai-net.com/system/00000000.aspx')
+
+
+  #在庫一覧表
+  driver.get("http://tri.hanbai-net.com/system/21026001.aspx?id=010199")
+
+
+  #--------店別---------
+  #★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+  #品番別売上集計をダウンロード
+
+  #日付入力
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond04"]').clear()    
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond04"]').send_keys(period1)
+  
+  #CSV出力
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()
+  
+  time.sleep(5)#一時待機
+
+
+  filelists = []
+  for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+      base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+      if ext == '.csv':#拡張子csvが一致した場合…
+          if base == '在庫一覧_':
+              filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+              #print("file:{},csv:{}" .format(file,csv))
+              filelists.sort(key=itemgetter(0), reverse=True)#
+              MAX_CNT = 0
+              for i, file in enumerate(filelists):
+                  if i > MAX_CNT-1:
+                      print(file[0])
+                      #file_1 = os.rename(i[0], 'kasi.csv')
+                      os.rename(file[0],'全店.csv')
+                      shutil.move('全店.csv',inventory_folder) 
+                      
+                      time.sleep(7)
+
+  for i_1 in tenpo_list:
+    #店舗入力
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_DropDownListCond01"]').send_keys(i_1[4])
+    
+    #日付入力
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond04"]').clear()    
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond04"]').send_keys(period1)
+    
+    #CSV出力
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()
+    
+    time.sleep(5)#一時待機
+
+
+    filelists = []
+    for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+        base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+        if ext == '.csv':#拡張子csvが一致した場合…
+            if base == '在庫一覧_':
+                filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+                #print("file:{},csv:{}" .format(file,csv))
+                filelists.sort(key=itemgetter(0), reverse=True)#
+                MAX_CNT = 0
+                for i, file in enumerate(filelists):
+                    if i > MAX_CNT-1:
+                        print(file[0])
+                        #file_1 = os.rename(i[0], 'kasi.csv')
+                        os.rename(file[0], str(i_1[2]) + '.csv')
+                        shutil.move(str(i_1[2]) + '.csv',inventory_folder) 
+                        
+                        
+                        
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>        
+  #売上データを取得 
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  driver.get('http://tri.hanbai-net.com/system/30021901.aspx?id=010199')#品番別売上集計
+  
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond02"]').clear()#日付クリア
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond02"]').send_keys(str(period2))#日付入力1
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond03"]').clear()#日付クリア
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtCond03"]').send_keys(str(period1))#日付入力2
+  
+  #----------全店------------
+
+  #driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCondRun"]').click()#検索
+
+  #time.sleep(5)
+
+  driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()#CSV出力
+
+  time.sleep(3)#一時待機
+
+  filelists = []
+  for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+      base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+      if ext == '.csv':#拡張子csvが一致した場合…
+          if base == '品番売上集計':
+              filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+              #print("file:{},csv:{}" .format(file,csv))
+              filelists.sort(key=itemgetter(0), reverse=True)#
+              MAX_CNT = 0
+              for i, file in enumerate(filelists):
+                  if i > MAX_CNT-1:
+                      print(file[0])
+                      #file_1 = os.rename(i[0], 'kasi.csv')
+                      os.rename(file[0], '全店.csv')
+                      shutil.move('全店.csv','C:/Users/fun-f/Desktop/analysis/data_folder')                        
+  time.sleep(1)                    
+  
+  
+  
+
+  #--------店別---------
+  #★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+  #品番別売上集計をダウンロード
+
+  for i_1 in tenpo_list:
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_DropDownListCond04"]').click()#店舗名指定上段
+
+    driver.find_element_by_xpath(str(i_1[0])).click()#店舗選択
+
+
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_DropDownListCond05"]').click()#店舗名指定下段
+
+    driver.find_element_by_xpath(str(i_1[1])).click()#店舗選択
+
+
+    #driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCondRun"]').click()#検索
+
+    driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnCSV"]').click()#CSV出力
+
+    time.sleep(3)#一時待機
+
+    filelists = []
+    for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+        base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+        if ext == '.csv':#拡張子csvが一致した場合…
+            if base == '品番売上集計':
+                filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+                #print("file:{},csv:{}" .format(file,csv))
+                filelists.sort(key=itemgetter(0), reverse=True)#
+                MAX_CNT = 0
+                for i, file in enumerate(filelists):
+                    if i > MAX_CNT-1:
+                        print(file[0])
+                        #file_1 = os.rename(i[0], 'kasi.csv')
+                        os.rename(file[0], str(i_1[2]) + '.csv')
+                        shutil.move(str(i_1[2]) + '.csv','C:/Users/fun-f/Desktop/analysis/data_folder') 
+                      
+  time.sleep(1)                    
+                        
+               
+
+  driver.close()
+
+download(period1)
+Book_path = 'C:/Users/fun-f/Desktop/入荷明細.xlsx'
+Out_Book_Path = "C:/Users/fun-f/Desktop/analysis/delivery_list"
+wb = pyxl.load_workbook(Book_path)
+
+for shop in tenpo_list:
+  print(shop)
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    #ここから
+      
+#>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  ws = wb[shop]
+
+  INVENTORY_COL = ["I","J","K","L","M","N"]
+  color_index = 6
+  size_index = 7
+  inventory_index = 8
+  
+  #日付を出力
+  ws["R1"].value = str(ReName.year) + "/" + str(ReName.month) + "/" + str(ReName.day) + "入荷予定明細"
+
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  if "TOKYO-BAY" == shop :
+    shop = "船橋"
+  
+  elif "越谷" == shop :
+    shop = "レイク"
+    
+  elif "むさし村山" == shop :
+    shop = "むさし"
+    
+  elif "湘南平塚"  == shop:
+    shop = "平塚"
+    
+  elif "愛知東郷" == shop:
+    shop = "東郷町"
+    
+  elif "水戸内原"== shop :
+    shop = "水戸"
+    
+  elif "EXPOCITY" == shop :
+    shop = "EXPO"
+    
+  elif "幕張新都心" == shop :
+    shop = "幕張"
+    
+
+  #売上実績
+  file_path = "C:/Users/fun-f/Desktop/analysis/data_folder"
+  filename = os.path.join(file_path,shop + ".csv")
+  r_file = pd.read_csv(filename,encoding="SHIFT-JIS")
+  df_r_file = pd.DataFrame(r_file)
+
+  item_cd = pd.DataFrame(df_r_file["商品コード"].astype("str").str.zfill(10).values,columns=["商品CD"])
+  item_name = pd.DataFrame(df_r_file["商品名"].values,columns=["商品名"])
+  category_cd = pd.DataFrame(df_r_file["商品コード"].astype("str").str.zfill(10).str[3:4].str.zfill(2).values,columns=["アイテムCD"])
+  quantity = pd.DataFrame(df_r_file["合計数量"].values,columns=["数量"])
+  sales_values = pd.DataFrame(df_r_file["合計金額"].values,columns=["金額"])
+
+  data_list = pd.concat([item_cd,item_name,category_cd,quantity,sales_values],axis=1)
+
+  data_list_sort = data_list.sort_values("金額",ascending=False).head(20)#変更前　10
+
+
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  #在庫リストを作成
+  #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  inventory_path = "C:/Users/fun-f/Desktop/analysis/inventory"
+  filename_inventory = os.path.join(inventory_path,shop + ".csv")
+  r_inventoryfile = pd.read_csv(filename_inventory,encoding="SHIFT-JIS")
+  df_r_inventoryfile = pd.DataFrame(r_inventoryfile)
+
+
+  #ユニーク商品名リスト
+  inventory_list = []
+  #EXCELの行数をカウント
+  Index_Counter = 0
+  RANKING_COUNTER = 0
+
+  unq_ItemNames = np.unique(df_r_inventoryfile["商品名"].values)
+
+  #売れ筋アイテム順にデータを取得
+  for Item_n in data_list_sort.values:
+    RANKING_COUNTER += 1
+
+    Start_Count = 0 #初期値
+    Item_n1 = Item_n[1]
+    Item_cd = Item_n[0]
+    
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    #入荷データ取得START
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    follow_col = [
+    
+    "P","Q","R","S","T","U"
+    
+    ]
+
+
+    File_Col_TtemCD = ["E","K","Q","W","AC","AI","AO"]
+    Header_Index_CD = 2 #品番行
+    Header_Index_MAKERCD = 3 #メーカー品番行
+    Header_Index_NAME = 4 #商品名行
+    color = 12
+    size = 13
+    inventory = 14
+
+    Product_Details = {
+      "E":["E","F","G","H","I","J"],
+      "K":["K","L","M","N","O","P"],
+      "Q":["Q","R","S","T","U","V"],
+      "W":["W","X","Y","Z","AA","AB"],
+      "AC":["AC","AD","AE","AF","AG","AH"],
+      "AI":["AI","AJ","AK","AL","AM","AN"],
+      "AO":["AO","AP","AQ","AR","AS","AT"]
+      
+    }
+
+    Shop_Col = ["C","D"]
+
+    Shop_List = {
+    10001008 : "柏",
+    10001009 : "千葉",
+    10001028 : "伊勢崎",
+    10001032 : "長町",
+    10001033 : "TOKYO-BAY" ,
+    10001034 : "富士見",
+    10001036 : "レイクタウン" ,
+    10001038 : "海老名" ,
+    10001039 : "むさし村山",
+    10001040 : "湘南平塚",
+    10001041 : "名取",
+    10001042 : "大高",
+    10001043 : "愛知東郷",
+    10001044 : "太田",
+    10001045 : "水戸内原",
+    10001046 : "EXPOCITY" ,
+    10001047 : "ラゾーナ川崎" ,
+    10001048 : "新三郷" ,
+    10001049 : "幕張新都心",
+    10001050 : "各務原" ,
+
+    }
+
+    # tenpo_list = {
+
+    #   '柏':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[2]',
+    #   '千葉':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[3]',
+    #   '伊勢崎':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[4]',
+    #   '長町':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[5]',
+    #   'TOKYO-BAY':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[6]',
+    #   '富士見':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[7]',
+    #   '越谷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[8]',
+    #   '海老名':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[9]',
+    #   'むさし村山':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[10]',
+    #   '湘南平塚':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[11]',
+    #   '名取':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[12]',
+    #   '大高':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[13]',
+    #   '愛知東郷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[14]',
+    #   '太田':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[15]',
+    #   '水戸内原':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[16]',
+    #   'EXPOCITY':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[17]',
+    #   '川崎':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[18]',
+    #   '新三郷':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[19]',
+    #   '幕張新都心':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[20]',
+    #   '各務原':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[21]'
+
+    #   }
+
+    class item:
+      
+      #item_cd = 品番CD
+      #item_name = 商品名
+      #sub_cd = メーカー品番
+      #category_cd = アイテムCD
+      #
+      
+      def __init__(self, item_cd , item_name, sub_cd , category_cd , category_name ,
+                  size1,size2,size3,size4,size5,size6,#サイズ展開を設定
+                  color1, color2, color3, color4, color5, color6#カラー展開を設定
+                  #delivery1,delivery2,delivery3,delivery4,delivery5,delivery,#配分数を設定
+                  ):
+        # コンストラクタ内でバリデーション処理を実装
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        #  パラメーターを設定
+        self.item_cd = item_cd  
+        
+        self.item_name = item_name
+        # セッターメソッド側でバリデーション処理を共通化
+        self.sub_cd = sub_cd
+        
+        #　アイテムCD
+        self.category_cd = category_cd
+        
+        # アイテム名
+        
+        self.category_name = category_name
+        
+        #【サイズ設定】
+        self.size1 = size1
+        
+        self.size2 = size2
+        
+        self.size3 = size3
+        
+        self.size4 = size4
+        
+        self.size5 = size5
+        
+        self.size6 = size6
+        
+        #【カラー設定】
+        self.color1 = color1
+        
+        self.color2 = color2
+        
+        self.color3 = color3
+        
+        self.color4 = color4
+        
+        self.color5 = color5
+        
+        self.color6 = color6
+      
+        #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    #today = '2022/07/14'
+    today = y + '/' + m + '/' + d
+
+    folder_path = 'C:/Users/fun-f/Desktop/analysis/delivery/'
+
+    delivery_item_list = []
+
+    files = os.listdir(folder_path)
+    
+          
+          #SKU毎配分データを取得
+          #value_list = []
+
+
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    #入荷データ取得END
+    #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
+
+  #for Item_n in unq_ItemNames:
+    KEY_DATA = df_r_inventoryfile[df_r_inventoryfile["商品名"] == Item_n1]
+    
+    #ここで該当アイテムがあるかをチェック
+    for file_name in files:
+
+      key = file_name.split("様配分表")
+      key_2 = key[1]
+      
+
+      result = re.findall(r"\d+", key_2)
+      
+      if today == str(2022) + "/" + str(result[0]).zfill(2) + "/" + str(result[1]).zfill(2) :
+      
+        r_wb = pyxl.load_workbook(folder_path + file_name)
+        
+        #シートネームを取得
+        sheet_names = r_wb.sheetnames
+
+        for sheet_NM in sheet_names:
+          
+          r_ws = r_wb[str(sheet_NM)]
+          
+          col_key = File_Col_TtemCD[0]
+          
+          #SKU毎配分データを取得
+          #value_list = []
+
+          
+          #商品情報を取得
+          for item_n in range(0,len(File_Col_TtemCD)):
+            
+            
+            cd = str(r_ws[str(File_Col_TtemCD[item_n]) + str(Header_Index_CD)].value).zfill(10)    
+            
+            #アイテムＣＤが一致した場合出力
+            if str(cd) == str(Item_cd):
+            
+              category_cd = cd[2:4]
+              name = r_ws[str(File_Col_TtemCD[item_n]) + str(Header_Index_CD + 2)].value
+              subcd = r_ws[str(File_Col_TtemCD[item_n]) + str(Header_Index_CD + 1)].value
+              color_col = Product_Details[File_Col_TtemCD[item_n]]
+              
+              color1 = r_ws[str(color_col[0]) + str(color)].value
+              color2 = r_ws[str(color_col[1]) + str(color)].value
+              color3 = r_ws[str(color_col[2]) + str(color)].value
+              color4 = r_ws[str(color_col[3]) + str(color)].value
+              color5 = r_ws[str(color_col[4]) + str(color)].value
+              color6 = r_ws[str(color_col[5]) + str(color)].value
+              
+              size1 = r_ws[str(color_col[0]) + str(size)].value
+              size2 = r_ws[str(color_col[1]) + str(size)].value
+              size3 = r_ws[str(color_col[2]) + str(size)].value
+              size4 = r_ws[str(color_col[3]) + str(size)].value
+              size5 = r_ws[str(color_col[4]) + str(size)].value
+              size6 = r_ws[str(color_col[5]) + str(size)].value
+              
+
+              
+              item.item_cd = cd
+              item.item_name = name
+              item.sub_cd = subcd
+              item.category_cd = category_cd
+              item.color1= color1
+              item.color2= color2
+              item.color3= color3
+              item.color4= color4
+              item.color5= color5
+              item.color6= color6
+              
+              item.size1 = size1
+              item.size2 = size2
+              item.size3 = size3
+              item.size4 = size4
+              item.size5 = size5
+              item.size6 = size6
+              
+                
+              #print("CHECK",item.item_cd,item.item_name,"\n",item.color1,item.color2,item.color3,item.color4,item.color5,item.color6,"\n",item.size1,item.size2,item.size3,item.size4,item.size5,item.size6,)
+              
+            else:
+              
+              category_cd = ""
+              name = ""
+              subcd = ""
+              color_col = ""
+              
+              color1 = ""
+              color2 = ""
+              color3 = ""
+              color4 = ""
+              color5 = ""
+              color6 = ""
+              
+              size1 = ""
+              size2 = ""
+              size3 = ""
+              size4 = ""
+              size5 = ""
+              size6 = ""
+              
+
+              
+              item.item_cd = cd
+              item.item_name = name
+              item.sub_cd = subcd
+              item.category_cd = category_cd
+              item.color1= color1
+              item.color2= color2
+              item.color3= color3
+              item.color4= color4
+              item.color5= color5
+              item.color6= color6
+              
+              item.size1 = size1
+              item.size2 = size2
+              item.size3 = size3
+              item.size4 = size4
+              item.size5 = size5
+              item.size6 = size6
+              
+    
+    
+    
+    
+    #KEY_DATA["商品コード"] == Item_cd
+    Index_Count = len(KEY_DATA.index.values)
+    #print("行数",Index_Count)
+    #print("ここ",math.ceil(Index_Count/6))
+    Rotation_Count = math.ceil(Index_Count/6)
+    print("行数=>",Rotation_Count)
+    if Rotation_Count == 0:
+      ws["A" + str(6 + (Index_Counter * 3))].value = str(RANKING_COUNTER) + "位"
+      ws["B" + str(6 + (Index_Counter * 3))].value = Item_n[0]
+      ws["C" + str(6 + (Index_Counter * 3))].value = Item_n[1]
+      # cell_target = str(6 + (Index_Counter * 3))
+      
+      # for img_x in img_stock_list:
+      #   base,ext = splitext(img_x)
+        
+      #   if str(base) == str(Item_n[0]) :
+          
+      #     t_path = img_stock + "/" + img_x
+
+      #     img = Image.open(t_path)
+          
+      #     re_img = img.resize((560, 750))
+          
+      #     re_img.save(t_path)
+          
+      #     pasting_img = pyxl.drawing.image.Image(t_path)
+      
+      #     pasting_img.anchor = str("D" + cell_target)#画像挿入
+          
+      #     ws.add_image(pasting_img)
+          
+      #ws["D" + str(6 + (Index_Counter * 3))].value = item_category[Item_n[2]]
+      img_name_list = []
+      cell_target = str(6 + (Index_Counter * 3))
+      for img_x in img_stock_list:
+        
+        base,ext = splitext(img_x)
+        if base == str(Item_n[0]):
+          img_name_list.append(img_x)  
+          
+      unq_img_name_list = np.unique(img_name_list)        
+          
+      try:
+        t_path = img_stock + "/" +  str(unq_img_name_list[0])
+
+        img = Image.open(t_path)
+        
+        re_img = img.resize((140, 160))
+        
+        re_img.save(t_path)
+            
+        pasting_img = pyxl.drawing.image.Image(t_path)
+        pasting_img.anchor = str("D" + cell_target)#画像挿入
+        #ws.add_image(pasting_img)
+      except IndexError:
+        print("NoImage")  
+        
+      ws["E" + str(6 + (Index_Counter * 3))].value = Item_n[3]
+      ws["F" + str(6 + (Index_Counter * 3))].value = Item_n[4]
+      ws["G" + str(6 + (Index_Counter * 3))].value = sum(KEY_DATA["現在数量"].values)
+      
+      try:
+      
+        ws["P" + str(6 + (Index_Counter * 3))].value = item.color1
+        ws["Q" + str(6 + (Index_Counter * 3))].value = item.color2
+        ws["R" + str(6 + (Index_Counter * 3))].value = item.color3
+        ws["S" + str(6 + (Index_Counter * 3))].value = item.color4
+        ws["T" + str(6 + (Index_Counter * 3))].value = item.color5
+        ws["U" + str(6 + (Index_Counter * 3))].value = item.color6
+        
+        ws["P" + str(7 + (Index_Counter * 3))].value = item.size1
+        ws["Q" + str(7 + (Index_Counter * 3))].value = item.size2
+        ws["R" + str(7 + (Index_Counter * 3))].value = item.size3
+        ws["S" + str(7 + (Index_Counter * 3))].value = item.size4
+        ws["T" + str(7 + (Index_Counter * 3))].value = item.size5
+        ws["U" + str(7 + (Index_Counter * 3))].value = item.size6
+        
+      except AttributeError:
+        
+        ws["P" + str(6 + (Index_Counter * 3))].value = ""
+        ws["Q" + str(6 + (Index_Counter * 3))].value = ""
+        ws["R" + str(6 + (Index_Counter * 3))].value = ""
+        ws["S" + str(6 + (Index_Counter * 3))].value = ""
+        ws["T" + str(6 + (Index_Counter * 3))].value = ""
+        ws["U" + str(6 + (Index_Counter * 3))].value = ""
+        
+        ws["P" + str(7 + (Index_Counter * 3))].value = ""
+        ws["Q" + str(7 + (Index_Counter * 3))].value = ""
+        ws["R" + str(7 + (Index_Counter * 3))].value = ""
+        ws["S" + str(7 + (Index_Counter * 3))].value = ""   
+        ws["T" + str(7 + (Index_Counter * 3))].value = ""
+        ws["U" + str(7 + (Index_Counter * 3))].value = ""
+          
+      
+    
+      Index_Counter += 1
+    
+    
+    for Rota in range(0,Rotation_Count):
+      
+      ws["A" + str(6 + (Index_Counter * 3))].value = str(RANKING_COUNTER) + "位"
+      ws["B" + str(6 + (Index_Counter * 3))].value = Item_n[0]
+      ws["C" + str(6 + (Index_Counter * 3))].value = Item_n[1]
+      # cell_target = str(6 + (Index_Counter * 3))
+      # for img_x in img_stock_list:
+      #   base,ext = splitext(img_x)
+        
+      #   if str(base) == str(Item_n[0]) :
+          
+      #     t_path = img_stock + "/" + img_x
+
+      #     img = Image.open(t_path)
+          
+      #     re_img = img.resize((560, 750))
+          
+      #     re_img.save(t_path)
+          
+      #     pasting_img = pyxl.drawing.image.Image(t_path)
+      
+      #     pasting_img.anchor = str("D" + cell_target)#画像挿入
+          
+      #     ws.add_image(pasting_img)
+      #ws["D" + str(6 + (Index_Counter * 3))].value = item_category[Item_n[2]]
+      img_name_list = []
+      cell_target = str(6 + (Index_Counter * 3))
+      for img_x in img_stock_list:
+        
+        base,ext = splitext(img_x)
+        if base == str(Item_n[0]):
+          img_name_list.append(img_x)  
+          
+      unq_img_name_list = np.unique(img_name_list)        
+          
+      try:
+        t_path = img_stock + "/" +  str(unq_img_name_list[0])
+
+        img = Image.open(t_path)
+        
+        re_img = img.resize((140, 160))
+        
+        re_img.save(t_path)
+            
+        pasting_img = pyxl.drawing.image.Image(t_path)
+        pasting_img.anchor = str("D" + cell_target)#画像挿入
+        ws.add_image(pasting_img)
+      except IndexError:
+        print("NoImage")  
+        
+        
+      ws["E" + str(6 + (Index_Counter * 3))].value = Item_n[3]
+      ws["F" + str(6 + (Index_Counter * 3))].value = Item_n[4]
+      ws["G" + str(6 + (Index_Counter * 3))].value = sum(KEY_DATA["現在数量"].values)
+      try:
+        ws["P" + str(6 + (Index_Counter * 3))].value = item.color1
+        ws["Q" + str(6 + (Index_Counter * 3))].value = item.color2
+        ws["R" + str(6 + (Index_Counter * 3))].value = item.color3
+        ws["S" + str(6 + (Index_Counter * 3))].value = item.color4
+        ws["T" + str(6 + (Index_Counter * 3))].value = item.color5
+        ws["U" + str(6 + (Index_Counter * 3))].value = item.color6
+        
+        ws["P" + str(7 + (Index_Counter * 3))].value = item.size1
+        ws["Q" + str(7 + (Index_Counter * 3))].value = item.size2
+        ws["R" + str(7 + (Index_Counter * 3))].value = item.size3
+        ws["S" + str(7 + (Index_Counter * 3))].value = item.size4
+        ws["T" + str(7 + (Index_Counter * 3))].value = item.size5
+        ws["U" + str(7 + (Index_Counter * 3))].value = item.size6
+        
+      except AttributeError:
+        
+        ws["P" + str(6 + (Index_Counter * 3))].value = ""
+        ws["Q" + str(6 + (Index_Counter * 3))].value = ""
+        ws["R" + str(6 + (Index_Counter * 3))].value = ""
+        ws["S" + str(6 + (Index_Counter * 3))].value = ""
+        ws["T" + str(6 + (Index_Counter * 3))].value = ""
+        ws["U" + str(6 + (Index_Counter * 3))].value = ""
+        
+        ws["P" + str(7 + (Index_Counter * 3))].value = ""
+        ws["Q" + str(7 + (Index_Counter * 3))].value = ""
+        ws["R" + str(7 + (Index_Counter * 3))].value = ""
+        ws["S" + str(7 + (Index_Counter * 3))].value = ""
+        ws["T" + str(7 + (Index_Counter * 3))].value = ""
+        ws["U" + str(7 + (Index_Counter * 3))].value = ""
+        
+        
+      # ws["Q" + str(6 + (Index_Counter * 3))].value = item.color2
+      # ws["R" + str(6 + (Index_Counter * 3))].value = item.color3
+      # ws["S" + str(6 + (Index_Counter * 3))].value = item.color4
+      # ws["T" + str(6 + (Index_Counter * 3))].value = item.color5
+      # ws["U" + str(6 + (Index_Counter * 3))].value = item.color6
+      
+      # ws["P" + str(7 + (Index_Counter * 3))].value = item.size1
+      # ws["Q" + str(7 + (Index_Counter * 3))].value = item.size2
+      # ws["R" + str(7 + (Index_Counter * 3))].value = item.size3
+      # ws["S" + str(7 + (Index_Counter * 3))].value = item.size4
+      # ws["T" + str(7 + (Index_Counter * 3))].value = item.size5
+      # ws["U" + str(7 + (Index_Counter * 3))].value = item.size6
+      
+        #Index_Counter += 1
+      print(str(Rota + 1) + "回目")
+
+      #while Start_Count < Index_Count:
+        
+      for Count_n in range(0,6):
+        #if Rota > Rotation_Count :
+
+          #break
+        
+        #print(Start_Count + (Rota * 5))
+        try:
+          print("スタートカウント",Start_Count)
+          print("VALUE",KEY_DATA)
+          inv_color = KEY_DATA.values[Start_Count][5]
+          inv_size = KEY_DATA.values[Start_Count][6]
+          inventory = KEY_DATA.values[Start_Count][10]
+          print("テスト",inv_color,inv_size,inventory)
+          
+          ws[INVENTORY_COL[Count_n] + str(color_index + (Index_Counter * 3))].value = inv_color
+          ws[INVENTORY_COL[Count_n] + str(size_index + (Index_Counter * 3))].value = inv_size
+          ws[INVENTORY_COL[Count_n] + str(inventory_index + (Index_Counter * 3))].value = inventory
+
+          
+          Start_Count += 1
+          
+        except IndexError:
+          
+          print("NoIndex")
+          Start_Count += 1
+          
+          #break  
+      Index_Counter += 1
+
+    Item_Name = pd.DataFrame([Item_n[1]],columns=["商品名"])
+    ItemQuantity = pd.DataFrame([sum(KEY_DATA["現在数量"].values)],columns=["在庫数量"])
+    
+    INDEX_DATA = pd.concat([Item_Name,ItemQuantity],axis=1)
+    inventory_list.append(INDEX_DATA)
+    
+  concat_inventory_list = pd.concat(inventory_list)
+  
+  
+  print("行数は",Index_Counter)
+SaveFileName = '【' + str(ReName_def) + '】入荷明細.xlsx'
+#SaveFileName = 'P処理指示書.xlsx'
+print(SaveFileName)
+wb.save('C:/Users/fun-f/Desktop/analysis/delivery_list/' + SaveFileName)
+
+#shutil.move(os.path.join("C:/Users/fun-f/Desktop/",SaveFileName),"C:/Users/fun-f/Desktop/analysis/delivery_list/")
