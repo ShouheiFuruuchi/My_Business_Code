@@ -1,0 +1,212 @@
+import openpyxl as pyxl
+import os
+import pandas as pd
+import datetime
+import glob
+import shutil
+from operator import itemgetter
+import time
+
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ChromeOptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+
+#---------------------------------------------------
+dr_files = 'C:/Users/fun-f/Desktop/analysis/returns'
+dr_read = os.listdir(dr_files)
+
+print(dr_read)
+
+for file_name in dr_read:
+  del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+  os.remove(del_f_path)#dataf内のファイルの削除
+  
+  
+print("期間指定しますか？\n\nYes⇒y\nNo⇒n")  
+switch = str(input())
+
+if str(switch) == "y":
+  
+  print("開始日を入力して下さい")
+  select_day1 = str(input())
+  print("最終日を入力して下さい")
+  select_day2 = str(input())
+  
+else:
+  print("指定なし")  
+
+  
+
+tenpo = [
+    "1001008",
+    "1001009",
+    "1001028",
+    "1001034",
+    "1001036",
+    "1001038",
+    "1001039",
+    "1001040",
+    "1001041",
+    "1001042",
+    "1001043",
+    "1001044",
+    "1001045",
+    "1001046",
+    "1001047",
+    "1001048",
+    "1001049",
+    "1001050",
+    "1001051",
+]
+
+url = 'http://tri.hanbai-net.com/system/Login.aspx'
+download_path = 'C:/Users/fun-f/Desktop/analysis/returns'
+
+
+options = webdriver.ChromeOptions()
+prefs = {"download.default_directory": download_path}
+options.add_experimental_option("prefs", prefs)
+
+driver = webdriver.Chrome("C:/Users/fun-f/chromedriver.exe")#,options=options)#2021 0724
+ 
+#driver = webdriver.Chrome(ChromeDriverManager().install())
+driver.get(url)
+
+#id_1 = 'tenpo'
+#id_2 = 'tenpo'
+
+id_1 = 'trinityadmin'
+id_2 = 'AdminTrinity'
+
+#loginid_1 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtUserCode"]')
+#loginid_2 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_txtPassword"]')
+
+
+loginid_1 = driver.find_element(By.ID,"ContentPlaceHolder1_txtUserCode")
+loginid_2 = driver.find_element(By.ID,"ContentPlaceHolder1_txtPassword")
+
+loginid_1.send_keys(id_1)#ユーザーIDを入力
+loginid_2.send_keys(id_2)#パスワードを入力
+
+driver.find_element(By.ID,"ContentPlaceHolder1_btnLogin").click()
+
+#driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_btnLogin"]').click() 
+#ログインボタンをクリック
+
+driver.get('http://tri.hanbai-net.com/system/00000000.aspx')
+
+#driver.find_element_by_xpath('//*[@id="Menu1"]/ul/li[7]').click()
+
+#driver.find_element_by_xpath('//*[@id="Menu1:submenu:57"]/li[9]/a').click()
+#'//*[@id="Menu1:submenu:58"]/li[9]/a'#変更前
+
+#driver.get('http://tri.hanbai-net.com/system/30021901.aspx?id=010199')#品番別売上集計
+driver.get('http://tri.hanbai-net.com/system/50010101.aspx?id=010199')#商品別売上集計
+
+#for shop_k in tenpo:
+  
+element_KEY = driver.find_element(By.ID,"ContentPlaceHolder1_DropDownList1")
+
+if str(switch) == "y":
+  driver.find_element(By.ID,"ContentPlaceHolder1_txtCond02").clear()
+  driver.find_element(By.ID,"ContentPlaceHolder1_txtCond02").send_keys(select_day1)
+
+  driver.find_element(By.ID,"ContentPlaceHolder1_txtCond03").clear()
+  driver.find_element(By.ID,"ContentPlaceHolder1_txtCond03").send_keys(select_day2)
+# select_element = Select(element_KEY)
+# select_element.select_by_value(shop_k)
+# driver.find_element(By.ID,"ContentPlaceHolder1_btnCondRun").click()
+# time.sleep(20)
+
+# context1 = driver.find_element_by_xpath('//*[@id="ContentPlaceHolder1_Label22"]').text#driver.find_element(By.ID,"ContentPlaceHolder1_Label22")
+# context2 = driver.find_element(By.ID,"ContentPlaceHolder1_UpdatePanel2").text
+# print(context1)
+
+driver.find_element(By.ID,"ContentPlaceHolder1_btnCSV").click()
+
+time.sleep(30)
+
+def Renames():
+
+  filelists = []
+  for file in os.listdir("C:/Users/fun-f/Downloads"):#ディレクトリ内をfor文で取り出す
+      base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+      if ext == '.csv':#拡張子csvが一致した場合…
+          if base == '営業日付別売上分析':
+              filelists.append([file, os.path.getctime(file)])#filelistsに取り出したfileにダウンロード時間を追加
+              #print("file:{},csv:{}" .format(file,csv))
+              filelists.sort(key=itemgetter(0), reverse=True)#
+              MAX_CNT = 0
+              for i, file in enumerate(filelists):
+                  if i > MAX_CNT-1:
+                      print(file[0])
+                      #file_1 = os.rename(i[0], 'kasi.csv')
+                      #os.rename(file[0], str(shop_k) + '営業日付別売上分析.csv')
+                      shutil.move('営業日付別売上分析.csv','C:/Users/fun-f/Desktop/analysis/returns') 
+try :
+  Renames()
+                        
+except :
+  print("実行エラー10秒待機…")
+  time.sleep(10)
+  print("ファイル無しの為、リトライします。")
+  Renames()
+  
+                        
+                     
+time.sleep(1)    
+
+driver.close()                
+        
+import pandas as pd
+import openpyxl as pyxl
+import numpy as np
+
+
+file_path = "C:/Users/fun-f/Desktop/analysis/returns/営業日付別売上分析.csv"
+out_file_path = "C:/Users/fun-f/Downloads/返品データ.xlsx"
+
+r_file = pd.read_csv(file_path,encoding="cp932")
+df_file = pd.DataFrame(r_file)
+
+
+out_wb = pyxl.load_workbook(out_file_path)
+out_ws = out_wb["Sheet1"]
+
+
+r = 0
+for shop_k in tenpo:
+  select_data = df_file[(df_file["店舗コード"] == int(shop_k)) & (df_file["返品額"] != '0') ]
+
+
+  shop_name = select_data["店舗名称"].values[0]
+  
+  
+  values_list = []
+  values_list2 = []
+  returns_values = select_data["返品額"].values
+  sales = select_data["売上額"].values
+  for i,i_2 in zip(returns_values,sales):
+    values_list2.append(int(i_2.replace(",","")))
+    if i != '0' :
+     values_list.append(int(i.replace("-","").replace(",","")))
+
+  returns_values_sum = sum(values_list)
+  returns_count = len(select_data["返品額"].values )
+  returns_quantity = sum(select_data["返品点数"].values)
+  sales = sum(values_list2)
+  quan = sum(select_data["売上点数"].values)
+  
+  print(shop_name,returns_values_sum,returns_count,returns_quantity)
+  out_ws["A" + str(5+r)].value = shop_name
+  out_ws["B" + str(5+r)].value = sales
+  out_ws["C" + str(5+r)].value = returns_values_sum
+  out_ws["E" + str(5+r)].value = quan
+  out_ws["F" + str(5+r)].value = returns_quantity 
+  
+  r += 1
+  
+out_wb.save("C:/Users/fun-f/Downloads/7月返品データ.xlsx")  
