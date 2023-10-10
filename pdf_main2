@@ -1,0 +1,440 @@
+
+#体のコードの紹介     
+import os
+import win32com.client
+import openpyxl as pyxl
+import time
+import shutil
+import datetime
+
+today = datetime.datetime.today()
+
+y = today.year
+m = today.month
+d = today.day
+
+ONEDRIVE_PATH = "C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/シフト管理 - 遠藤 孝道 さんのファイル/【20220703】 " + str(int(y)) + " " + str(int(m)) + "月シフト 【販売部】 ver 17.xlsm"
+#COPYFILE_PATH = "C:/Users/古内翔平/Desktop/シフトコピー/【20220703】 2023 10月シフト 【販売部】 ver 17.xlsm"
+COPYFILE_PATH = "C:/Users/古内翔平/Desktop/シフトコピー/SELECT_FILE.xlsm"
+#TIMESCHEDULER_FILE = "C:/Users/古内翔平/Desktop/シフトコピー/TimeScheduler.xlsm"
+TIMESCHEDULER_FILE = 'C:/Users/古内翔平/Desktop/シフトコピー/TimeScheduler.xlsx'
+#COPY_TIMESCHEDULER_FILE ="C:/Users/古内翔平/Desktop/TimeScheduler.xlsx"
+COPY_TIMESCHEDULER_FILE ="C:/Users/古内翔平/Desktop/シフトコピー/保管/TimeScheduler.xlsx"
+#PDF格納フォルダ
+dr_files = 'C:/Users/古内翔平/Desktop/TimeSchedulerSystem'
+dr_read = os.listdir(dr_files)
+
+
+for file_name in dr_read:
+  del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+  os.remove(del_f_path)#dataf内のファイルの削除
+
+shutil.copy(ONEDRIVE_PATH,COPYFILE_PATH)
+shutil.copy(COPY_TIMESCHEDULER_FILE,TIMESCHEDULER_FILE)
+time.sleep(2)
+
+
+excel = win32com.client.Dispatch("Excel.Application")
+#path = r'C:/abc/def/ghi'
+#path = "C:/Users/古内翔平/Downloads"
+path = "C:/Users/古内翔平/Desktop/シフトコピー"
+
+
+#r削除
+#inputDir = COPYFILE_PATH#"C:/Users/古内翔平/Downloads/【20220703】 2023 10月シフト 【販売部】 ver 17.xlsm"#path + r'\Excel'
+inputDir = TIMESCHEDULER_FILE
+outputDir = path + r'\PDF'
+
+shop_name_list = [
+  "柏T",
+  "千葉T",
+  "伊勢崎T",
+  "富士見T",
+  "レイクT",
+  "海老名T",
+  "むさしT",
+  "平塚T",
+  "名取T",
+  "大高T",
+  "東郷T",
+  "太田T",
+  "水戸T",
+  "EXPOT",
+  "川崎T",
+  "新三郷T",
+  "幕張T",
+  "各務原T",
+  "堺T",
+  
+]
+
+def PDF_FILE(file_path):
+
+    base, ext = os.path.splitext(file_path)
+    if ext == '.xlsx' and '~$' not in base:
+        wb = excel.Workbooks.Open(os.path.join(inputDir,file_path))
+        for shop_name in shop_name_list:
+            SHEET_NAME = shop_name 
+            wb.WorkSheets(SHEET_NAME).Select()
+            wb.ActiveSheet.ExportAsFixedFormat(0,"C:/Users/古内翔平/Desktop/TimeSchedulerSystem/{}.pdf".format(SHEET_NAME))# outputDir + '/' + base + '.pdf")
+        wb.Close()
+
+def helplist():
+
+    import openpyxl as pyxl
+    import os
+    import pandas as pd
+
+
+    PATH = COPYFILE_PATH
+    #"C:/Users/古内翔平/Downloads/【20220703】 2023 10月シフト 【販売部】 ver 17 (5).xlsm"
+
+    WB = pyxl.load_workbook(PATH,data_only=True)
+    SHEET_NAMES = ["本部【1】","所属登録",]
+    SHOP_KEY = {"柏":"柏T",
+                "千葉":"千葉T",
+                "伊勢崎":"伊勢崎T",
+                "富士見":"富士見T",
+                "レイク":"レイクT",
+                "海老名":"海老名T",
+                "むさし":"むさしT",
+                "平塚":"平塚T",
+                "名取":"名取T",
+                "大高":"大高T",
+                "東郷町":"東郷T",
+                "太田":"太田T",
+                "水戸":"水戸T",
+                "エキスポ":"EXPOT",
+                "川崎":"川崎T",
+                "新三郷":"新三郷T",
+                "幕張":"幕張T",
+                "各務原":"各務原T",
+                "堺":"堺T"
+                }
+
+    SHOP_KEY_DIC = {
+                "FUN柏":"柏",
+                "千葉":"千葉",
+                "伊勢崎":"伊勢崎",
+                "富士見":"富士見",
+                "レイク":"レイク",
+                "海老名":"海老名",
+                "むさし":"むさし",
+                "平塚":"平塚",
+                "名取":"名取",
+                "大高":"大高",
+                "東郷町":"東郷町",
+                "FUNイオンモール太田":"太田",
+                "FUNイオンモール水戸内原":"水戸",
+                "FUNららぽーとEXPOCITY":"エキスポ",
+                "FUNラゾーナ川崎":"川崎",
+                "FUN新三郷ららぽーと":"新三郷",
+                "FUNイオンモール幕張新都心":"幕張",
+                "各務原":"各務原",
+                "堺":"堺"
+                }
+
+
+    COL_H = ["Z","AE","AJ","AO","AT","AY","BD","BI","BN","BS","BX","CC","CH","CM","CR","CW","DB","DG","DL","DQ"] #本部COL
+    COL_T = ["AG","AO","AW","BE","BM","BU","CC","CK","CS","DA"]
+
+    WS_S  = WB[SHEET_NAMES[0]]
+
+    WS_REG = WB[SHEET_NAMES[1]]
+
+
+    #本部STAFFのシフトデータリストを作成
+    STAFF_LIST_HONBU = []
+    for i in range(20) :
+        STAFF_CD = WS_REG["C" + str(253 + i)].value #社員CD
+        
+        if  STAFF_CD == None :
+            print("None")
+            
+        else:    
+            STAFF_NAME = WS_REG["E" + str(253 + i)].value #氏名
+            STAFF_AFF = WS_REG["D" + str(253 + i)].value #所属
+            STAFF_SALES = WS_REG["G" + str(253 + i)].value #販売力
+            D1 = WS_S[COL_H[i] + str(13)].value 
+            D2 = WS_S[COL_H[i] + str(16)].value 
+            D3 = WS_S[COL_H[i] + str(19)].value 
+            D4 = WS_S[COL_H[i] + str(22)].value 
+            D5 = WS_S[COL_H[i] + str(25)].value 
+            D6 = WS_S[COL_H[i] + str(28)].value 
+            D7 = WS_S[COL_H[i] + str(31)].value 
+            D8 = WS_S[COL_H[i] + str(34)].value 
+            D9 = WS_S[COL_H[i] + str(37)].value 
+            D10 = WS_S[COL_H[i] + str(40)].value 
+            D11 = WS_S[COL_H[i] + str(43)].value 
+            D12 = WS_S[COL_H[i] + str(46)].value 
+            D13 = WS_S[COL_H[i] + str(49)].value 
+            D14 = WS_S[COL_H[i] + str(52)].value 
+            D15 = WS_S[COL_H[i] + str(55)].value 
+            D16 = WS_S[COL_H[i] + str(58)].value 
+            D17 = WS_S[COL_H[i] + str(61)].value 
+            D18 = WS_S[COL_H[i] + str(64)].value 
+            D19 = WS_S[COL_H[i] + str(67)].value 
+            D20 = WS_S[COL_H[i] + str(70)].value 
+            D21 = WS_S[COL_H[i] + str(73)].value 
+            D22 = WS_S[COL_H[i] + str(76)].value 
+            D23 = WS_S[COL_H[i] + str(79)].value 
+            D24 = WS_S[COL_H[i] + str(82)].value 
+            D25 = WS_S[COL_H[i] + str(85)].value 
+            D26 = WS_S[COL_H[i] + str(88)].value 
+            D27 = WS_S[COL_H[i] + str(91)].value 
+            D28 = WS_S[COL_H[i] + str(94)].value 
+            D29 = WS_S[COL_H[i] + str(97)].value 
+            D30 = WS_S[COL_H[i] + str(100)].value 
+            D31 = WS_S[COL_H[i] + str(103)].value 
+            
+            STAFF_DATA = pd.DataFrame([{"社員CD" :STAFF_CD,"氏名":STAFF_NAME,"所属":STAFF_AFF,"販売力":STAFF_SALES,
+                                        "D1" : D1,
+                                        "D2" : D2,
+                                        "D3" : D3,
+                                        "D4" : D4,
+                                        "D5" : D5,
+                                        "D6" : D6,
+                                        "D7" : D7,
+                                        "D8" : D8,
+                                        "D9" : D9,
+                                        "D10" : D10,
+                                        "D11" : D11,
+                                        "D12" : D12,
+                                        "D13" : D13,
+                                        "D14" : D14,
+                                        "D15" : D15,
+                                        "D16" : D16,
+                                        "D17" : D17,
+                                        "D18" : D18,
+                                        "D19" : D19,
+                                        "D20" : D20,
+                                        "D21" : D21,
+                                        "D22" : D22,
+                                        "D23" : D23,
+                                        "D24" : D24,
+                                        "D25" : D25,
+                                        "D26" : D26,
+                                        "D27" : D27,
+                                        "D28" : D28,
+                                        "D29" : D29,
+                                        "D30" : D30,
+                                        "D31" : D31
+                                        
+                                        
+                                        }])
+            STAFF_LIST_HONBU.append(STAFF_DATA)
+        
+        
+    CONCAT_STAFF_LIST_HONBU = pd.concat(STAFF_LIST_HONBU)    
+
+    tenpo_counter = 0
+    STAFF_LIST_TENPO = []
+    for i_2 in range(21):
+        #try :
+        
+        for i_3 in range(10):
+            
+            tenpo_name_full = WS_REG["A" + str(3 + i_3 + tenpo_counter)].value
+            if tenpo_name_full == "長町" :
+                
+                print("No")
+            elif tenpo_name_full == "船橋" :  
+                print("No")
+                
+            else :
+                tenpo_name_key = SHOP_KEY_DIC[tenpo_name_full]
+                STAFF_CD = WS_REG["C" + str(3 + i_3 + tenpo_counter)].value
+                
+                if STAFF_CD == None :
+                    print("None")
+                    
+                else:
+                    
+                    STAFF_NAME = WS_REG["E" + str(3 + i_3 + tenpo_counter)].value
+                    STAFF_AFF = WS_REG["D" + str(3 + i_3 + tenpo_counter)].value
+                    STAFF_SALES = WS_REG["G" + str(3 + i_3 + tenpo_counter)].value
+                    WS_T = WB[tenpo_name_key]
+                    
+                    D1 = WS_T[COL_T[i_3] + str(16)].value 
+                    D2 = WS_T[COL_T[i_3] + str(19)].value 
+                    D3 = WS_T[COL_T[i_3] + str(22)].value 
+                    D4 = WS_T[COL_T[i_3] + str(25)].value 
+                    D5 = WS_T[COL_T[i_3] + str(28)].value 
+                    D6 = WS_T[COL_T[i_3] + str(31)].value 
+                    D7 = WS_T[COL_T[i_3] + str(34)].value 
+                    D8 = WS_T[COL_T[i_3] + str(37)].value 
+                    D9 = WS_T[COL_T[i_3] + str(40)].value 
+                    D10 = WS_T[COL_T[i_3] + str(43)].value 
+                    D11 = WS_T[COL_T[i_3] + str(46)].value 
+                    D12 = WS_T[COL_T[i_3] + str(49)].value 
+                    D13 = WS_T[COL_T[i_3] + str(52)].value 
+                    D14 = WS_T[COL_T[i_3] + str(55)].value 
+                    D15 = WS_T[COL_T[i_3] + str(58)].value 
+                    D16 = WS_T[COL_T[i_3] + str(61)].value 
+                    D17 = WS_T[COL_T[i_3] + str(64)].value 
+                    D18 = WS_T[COL_T[i_3] + str(67)].value 
+                    D19 = WS_T[COL_T[i_3] + str(70)].value 
+                    D20 = WS_T[COL_T[i_3] + str(73)].value 
+                    D21 = WS_T[COL_T[i_3] + str(76)].value 
+                    D22 = WS_T[COL_T[i_3] + str(79)].value 
+                    D23 = WS_T[COL_T[i_3] + str(82)].value 
+                    D24 = WS_T[COL_T[i_3] + str(85)].value 
+                    D25 = WS_T[COL_T[i_3] + str(88)].value 
+                    D26 = WS_T[COL_T[i_3] + str(91)].value 
+                    D27 = WS_T[COL_T[i_3] + str(94)].value 
+                    D28 = WS_T[COL_T[i_3] + str(97)].value 
+                    D29 = WS_T[COL_T[i_3] + str(100)].value 
+                    D30 = WS_T[COL_T[i_3] + str(103)].value 
+                    D31 = WS_T[COL_T[i_3] + str(106)].value 
+                    
+                    
+                    STAFF_DATA = pd.DataFrame([{"店舗名":tenpo_name_full,"店舗Key" : tenpo_name_key,"社員CD" :STAFF_CD,"氏名":STAFF_NAME,"所属":STAFF_AFF,"販売力":STAFF_SALES,
+                                            "D1" : D1,
+                                            "D2" : D2,
+                                            "D3" : D3,
+                                            "D4" : D4,
+                                            "D5" : D5,
+                                            "D6" : D6,
+                                            "D7" : D7,
+                                            "D8" : D8,
+                                            "D9" : D9,
+                                            "D10" : D10,
+                                            "D11" : D11,
+                                            "D12" : D12,
+                                            "D13" : D13,
+                                            "D14" : D14,
+                                            "D15" : D15,
+                                            "D16" : D16,
+                                            "D17" : D17,
+                                            "D18" : D18,
+                                            "D19" : D19,
+                                            "D20" : D20,
+                                            "D21" : D21,
+                                            "D22" : D22,
+                                            "D23" : D23,
+                                            "D24" : D24,
+                                            "D25" : D25,
+                                            "D26" : D26,
+                                            "D27" : D27,
+                                            "D28" : D28,
+                                            "D29" : D29,
+                                            "D30" : D30,
+                                            "D31" : D31
+
+                                            }])
+                    
+
+                    STAFF_LIST_TENPO.append(STAFF_DATA)
+                    
+
+        tenpo_counter += 10
+            
+        #except :
+            #tenpo_counter += 10
+            
+
+    CONCAT_STAFF_LIST_TENPO = pd.concat(STAFF_LIST_TENPO)
+        
+        
+
+
+    print(CONCAT_STAFF_LIST_TENPO)
+
+
+    ToDay_Key = int(d)
+    Help_List =[]
+    for SK in SHOP_KEY:
+
+        for i_4 in CONCAT_STAFF_LIST_TENPO.values :
+            
+            ToDay_Shift = i_4[5 + ToDay_Key]
+            if ToDay_Shift == None :
+                print("NoData")
+                
+            else :
+                
+                if SK in ToDay_Shift:
+                    HELP_DATA = pd.DataFrame([{"ヘルプ店舗":SK,"所属店舗":i_4[0],"所属KEY":i_4[1],"社員CD":i_4[2],"氏名":i_4[3],"役職":i_4[4],"販売力":i_4[5],"シフト":i_4[5 + ToDay_Key]}])
+                    Help_List.append(HELP_DATA)
+                    
+        for i_5 in CONCAT_STAFF_LIST_HONBU.values :
+            ToDay_Shift = i_5[3 + ToDay_Key]
+            if ToDay_Shift == None :
+                print("NoData")
+                
+            else :
+                
+                if SK in ToDay_Shift:
+                    
+                    HELP_DATA = pd.DataFrame([{"ヘルプ店舗":SK,"所属店舗":"本部","所属KEY":"本部","社員CD":i_5[0],"氏名":i_5[1],"役職":i_5[2],"販売力":i_5[3],"シフト":i_5[3 + ToDay_Key]}])
+                    Help_List.append(HELP_DATA)
+                
+                
+                    
+                
+            
+    CONCAT_HELP_LIST = pd.concat(Help_List)
+    #print(CONCAT_HELP_LIST) 
+    Help_COLLIST = ["K","L","M","N"]   
+    
+    W_WB = pyxl.load_workbook(TIMESCHEDULER_FILE,data_only=False,keep_links=True)#,data_only=True　追記コード
+    for sheet_name,S_KEY in zip(SHOP_KEY,SHOP_KEY.values()):
+
+        W_WS = W_WB[S_KEY]
+        
+        #当日シフトを出力
+        MATCH_DATA_ToShop = CONCAT_STAFF_LIST_TENPO[CONCAT_STAFF_LIST_TENPO["店舗Key"] == sheet_name].values
+        row_counter3 = 0
+        for toshopshift_data in MATCH_DATA_ToShop:
+            W_WS[Help_COLLIST[0] + str(16 + row_counter3)].value = toshopshift_data[4]
+            W_WS[Help_COLLIST[1] + str(16 + row_counter3)].value = toshopshift_data[3]
+            W_WS[Help_COLLIST[2] + str(16 + row_counter3)].value = toshopshift_data[5]
+            W_WS[Help_COLLIST[3] + str(16 + row_counter3)].value = toshopshift_data[5 + ToDay_Key]
+            
+            row_counter3 += 1
+        
+        
+        
+        
+        MATCH_DATA = CONCAT_HELP_LIST[CONCAT_HELP_LIST["ヘルプ店舗"] == sheet_name]
+        #if len(MATCH_DATA) >= 1:
+        H_staff = MATCH_DATA[MATCH_DATA["所属KEY"] == "本部"].values
+        #try :
+        row_counter1 = 0
+        for output_data in H_staff :
+            W_WS[Help_COLLIST[0] + str(26 + row_counter1)].value = output_data[5]
+            W_WS[Help_COLLIST[1] + str(26 + row_counter1)].value = output_data[4]
+            W_WS[Help_COLLIST[2] + str(26 + row_counter1)].value = output_data[6]
+            W_WS[Help_COLLIST[3] + str(26 + row_counter1)].value = output_data[7]
+            
+            row_counter1 += 1
+
+                
+            
+        T_staff = MATCH_DATA[MATCH_DATA["所属KEY"] != "本部"].values
+        row_counter2 = 0
+        try:
+            for output_data2 in T_staff :
+                W_WS[Help_COLLIST[0] + str(29 + row_counter2)].value = output_data2[5]
+                W_WS[Help_COLLIST[1] + str(29 + row_counter2)].value = output_data2[4]
+                W_WS[Help_COLLIST[2] + str(29 + row_counter2)].value = output_data2[6]
+                W_WS[Help_COLLIST[3] + str(29 + row_counter2)].value = output_data2[7]
+                
+                row_counter2 += 1
+                
+        except :
+            print("NoData")        
+            
+            #for row in range(3):
+                #W_WS[Help_List[0] + 26 + row].value = H_staff["役職"]
+                
+                
+    W_WB.save(TIMESCHEDULER_FILE) 
+    time.sleep(5)
+    W_WB.close()   
+            
+
+
+helplist()
+
+PDF_FILE(inputDir)   
