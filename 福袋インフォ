@@ -1,0 +1,372 @@
+#1188999007000
+#福袋在庫集計
+
+
+#----------------------------------------------------------------------------------------------
+
+
+import time
+import selenium
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver import ChromeOptions
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import datetime
+import os
+import glob
+import shutil
+from operator import itemgetter
+import datetime
+import pandas as pd
+import re
+import numpy as np
+import collections
+import requests
+import openpyxl as pyxl
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeServeice
+#
+
+#このプログラムは店別品番別実績を自動ダウンロードを行う
+
+#ーーーーーーー販売NETスクレイピングーーーーーーーーーーー
+
+kasiwa = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[3]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[3]','柏','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[3]',"01001008 FUN柏","01001008",]
+chiba = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[4]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[4]', '千葉','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[4]',"01001009 FUN千葉C-one","01001009",]
+isesaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[9]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[9]','伊勢崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[9]',"01001028 FUNスマーク伊勢崎","01001028",]
+nagamachi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[11]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[11]','長町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[11]',"01001032 FUNララガーデン長町","01001032",]
+hunabashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[12]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[12]','船橋','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[12]',"01001033 FUNららぽーとTOKYO-BAY","01001033",]
+hujimi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[13]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[13]','富士見','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[13]',"01001034 FUNららぽーと富士見","01001034",]
+reiku = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[15]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[15]','レイク','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[15]',"01001036 FUNイオンレイクタウン","01001036",]
+ebina = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[17]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[17]','海老名','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[17]',"01001038 FUNららぽーと海老名","01001038",]
+musashi = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[18]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[18]','むさし','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[18]',"01001039 FUNイオンモールむさし村山","01001039",]
+hiratuka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[19]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[19]','平塚','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[19]',"01001040 FUNららぽーと湘南平塚","01001040",]
+natori = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[20]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[20]','名取','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[20]',"01001041 FUNイオンモール名取","01001041",]
+otaka = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[21]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[21]','大高','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[21]',"01001042 FUNイオンモール大高","01001042",]
+togocyo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[22]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[22]','東郷町','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[22]',"01001043 FUNららぽーと愛知東郷","01001043",]
+ota = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[23]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[23]','太田','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[23]',"01001044 FUNイオンモール太田","01001044",]
+mito = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[24]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[24]','水戸','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[24]',"01001045 FUNイオンモール水戸内原","01001045",]
+expo = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[25]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[25]','EXPO','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[25]',"01001046 FUNららぽーとEXPOCITY","01001046",]
+kawasaki = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[26]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[26]','川崎','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[26]',"01001047 FUNラゾーナ川崎プラザ","01001047",]
+sinmisato = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[27]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[27]','新三郷','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[27]',"01001048 FUNららぽーと新三郷","01001048",]
+makuhari = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[28]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[28]','幕張','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[28]',"01001049 FUNイオンモール幕張新都心","01001049",]
+kagamihara = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[29]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[29]','各務原','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[29]',"01001050 FUNイオンモール各務原","01001050",]
+sakai = ['//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[30]','//*[@id="ContentPlaceHolder1_DropDownListCond05"]/option[30]','堺','//*[@id="ContentPlaceHolder1_DropDownList9"]/option[30]',"01001051 FUNららぽーと堺","01001051",]
+
+
+
+tenpo_list = [
+  kasiwa,
+  chiba,
+  isesaki,
+  # nagamachi,
+  # hunabashi,
+  hujimi,
+  reiku,
+  ebina,
+  musashi,
+  hiratuka,
+  natori,
+  otaka,
+  togocyo,
+  ota,
+  mito,
+  expo,
+  kawasaki,
+  sinmisato,
+  makuhari,
+  kagamihara,
+  sakai,
+  ]
+
+SHOP_KEYs = [
+    'FUN柏',
+    'FUN千葉C-one',
+    'FUNスマーク伊勢崎',
+    'FUNららぽーと富士見',
+    'FUNイオンレイクタウン',
+    'FUNららぽーと海老名',
+    'FUNイオンモールむさし村山',
+    'FUNららぽーと湘南平塚',
+    'FUNイオンモール名取',
+    'FUNイオンモール大高',
+    'FUNららぽーと愛知東郷',
+    'FUNイオンモール太田',
+    'FUNイオンモール水戸内原',
+    'FUNららぽーとEXPOCITY',
+    'FUNラゾーナ川崎プラザ',
+    'FUNららぽーと新三郷',
+    'FUNイオンモール幕張新都心',
+    'FUNイオンモール各務原',
+    'FUNららぽーと堺',
+
+]
+
+ToDay = datetime.date.today()
+y = ToDay.year
+m = ToDay.month
+d = ToDay.day
+
+
+def download() :
+    #ーーーーーーーーーー前回データの削除ーーーーーーーーーーーーー
+
+    #ーーーーーーーー前回ダウンロードファイル削除ーーーーーーーーーー
+
+    dr_files = 'C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/analysis/inventory'
+    dr_read = os.listdir(dr_files)
+
+
+    for file_name in dr_read:
+        del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+        os.remove(del_f_path)#dataf内のファイルの削除
+        
+    del_folder_path = "C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/myfile/basket-analysis/data-folder"#削除対象フォルダー
+
+    del_read = os.listdir(del_folder_path)#削除対象のディレクトリ内のファイル名を取得
+
+
+    for del_file_name in del_read:
+        del_faile_path = del_folder_path + '/' + del_file_name#削除ファイルパスの設定
+        os.remove(del_faile_path)#dataf内のファイルの削除
+        
+    print('削除完了')      
+        
+    #---------------------------------------------------」
+    
+    ToDay = datetime.date.today()
+    y = ToDay.year
+    m = ToDay.month
+    d = ToDay.day
+    
+    #period1 = str(y) + "0101"
+    #period2 = str(y) + str(m).zfill(2) + str(d).zfill(2)
+    
+    period1 = "20231217"
+    period2 = str(y) + str(m).zfill(2) + str(d).zfill(2)
+
+    url = 'http://tri.hanbai-net.com/system/Login.aspx'
+    
+    chrome_options = Options()
+    chrome_options.add_experimental_option("detach", True)
+
+    driver = webdriver.Chrome(service=ChromeServeice(ChromeDriverManager().install()))
+
+    driver.get(url)
+
+    id_1 = 'trinityadmin'
+    id_2 = 'AdminTrinity'
+
+
+    loginid_1 = driver.find_element(By.ID, "ContentPlaceHolder1_txtUserCode")
+    loginid_2 = driver.find_element(By.ID, "ContentPlaceHolder1_txtPassword")
+
+    loginid_1.send_keys(id_1)#ユーザーIDを入力
+    loginid_2.send_keys(id_2)#パスワードを入力
+
+
+    #ログインボタンをクリック
+    driver.find_element(By.ID, "ContentPlaceHolder1_btnLogin").click()
+
+
+    time.sleep(2)
+    
+    driver.get('http://tri.hanbai-net.com/system/50010201.aspx?id=010199')
+
+
+
+    driver.find_element(By.ID,"ContentPlaceHolder1_txtCond07").clear()#日付クリア
+
+    driver.find_element(By.ID,"ContentPlaceHolder1_txtCond07").send_keys(period1)#日付入力(前)
+
+    driver.find_element(By.ID,"ContentPlaceHolder1_txtCond10").clear()#日付クリア
+
+    driver.find_element(By.ID,"ContentPlaceHolder1_txtCond10").send_keys(period2)#日付入力(後)
+
+    # driver.find_element(By.ID,"ContentPlaceHolder1_btnCondRun").click()#検索
+
+    # time.sleep(5)
+    driver.find_element(By.XPATH,'//*[@id="ContentPlaceHolder1_DropDownList10"]').send_keys("0 販売")
+
+    driver.find_element(By.ID,"ContentPlaceHolder1_btnCSV").click()#CSV出力
+
+    time.sleep(10)#一時待機
+
+    filelists = []
+    for file in os.listdir("C:/Users/古内翔平/Downloads"):#ディレクトリ内をfor文で取り出す
+        base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+        if ext == '.csv':#拡張子csvが一致した場合…
+            if base == '販売分析ログ':
+                filelists.append([file, os.path.getctime("C:/Users/古内翔平/Downloads/" + file)])#filelistsに取り出したfileにダウンロード時間を追加
+                #print("file:{},csv:{}" .format(file,csv))
+                filelists.sort(key=itemgetter(0), reverse=True)#
+                MAX_CNT = 0
+                for i, file in enumerate(filelists):
+                    if i > MAX_CNT-1:
+                        print(file[0])
+                        time.sleep(2)
+                        #file_1 = os.rename(i[0], 'kasi.csv')
+                        #os.rename("C:/Users/古内翔平/Downloads/販売分析ログ.csv", '顧客データ.csv')
+                        shutil.move('C:/Users/古内翔平/Downloads/販売分析ログ.csv','C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/myfile/basket-analysis/data-folder')                        
+    time.sleep(3)  
+      
+
+    driver.get('http://tri.hanbai-net.com/system/21026001.aspx?id=010199')#在庫一覧
+
+    #CSV
+    driver.find_element(By.ID, "ContentPlaceHolder1_btnCSV").click()
+    time.sleep(5)
+
+    filelists = []
+
+    for file in os.listdir("C:/Users/古内翔平/Downloads"):#ディレクトリ内をfor文で取り出す
+        base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+        if ext == '.csv':#拡張子csvが一致した場合…
+            if base == '在庫一覧_':
+                filelists.append([file, os.path.getctime("C:/Users/古内翔平/Downloads/" + str(file))])#filelistsに取り出したfileにダウンロード時間を追加
+                filelists.sort(key=itemgetter(0), reverse=True)#
+                MAX_CNT = 0
+                for i, file in enumerate(filelists):
+                    if i > MAX_CNT-1:
+
+                        os.rename("C:/Users/古内翔平/Downloads/" + str(file[0]), "C:/Users/古内翔平/Downloads/" + str("全店") + '.csv')
+                        shutil.move("C:/Users/古内翔平/Downloads/" + str("全店") + '.csv' ,'C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/analysis/inventory')                        
+    time.sleep(5)    
+    
+    driver.close()
+    
+    return y
+
+#--------店別---------
+download()
+
+TargetCD = "1188999007000"
+#在庫データ
+r_file = pd.read_csv('C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/analysis/inventory/全店.csv',encoding='cp932')
+df = pd.DataFrame(r_file)
+
+#売上データ
+r_file2 = pd.read_csv('C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/myfile/basket-analysis/data-folder/販売分析ログ.csv',encoding='cp932')
+df2 = pd.DataFrame(r_file2)
+
+Target_df = df[df["商品コード"] == TargetCD ].sort_values("現在数量",ascending=False)
+Target_df2 = df2[df2["商品コード"] == TargetCD ]
+print(Target_df2)
+
+
+
+HappyBag = []
+for i in SHOP_KEYs :
+    if i != "FUNイオンモール水戸内原" :
+    #try:
+        Data = Target_df[Target_df["拠点名"] == i]
+        Data2 = sum(Target_df2[Target_df2["店舗名"] == i].values)
+        print(Data.values)
+        HappyBag.append(pd.DataFrame([{"店舗":Data.values[0][1],"在庫数":Data.values[0][10],"売上数量":Data2}]))
+    else:
+    #except :
+        HappyBag.append(pd.DataFrame([{"店舗":i,"在庫数":0,"売上数量":Data2}]))
+        
+        #HappyBag.append([i,"完売"])
+    
+print(HappyBag)             
+        
+HappyBagInventory = pd.concat(HappyBag).sort_values("在庫数",ascending=False)
+print(HappyBagInventory)
+
+  
+TOKEN = 'NxPDQg0tpI4oY6BZHo7vkZ3gxPtTIijpWFyN85xL2q1'#テストの部屋トークン
+#TOKEN = 'TNKXBcpEMmK4JAmRPaOyVABkA5GWIJkIHQOnsyfu4MD'#FUNの部屋トークン
+api_url = 'https://notify-api.line.me/api/notify'
+headers = {'Authorization' : 'Bearer ' + TOKEN}
+
+message_1 = ( '\n福袋残在庫報告\n' +  str(y) + '年' + str(m) + '月' + str(d) + '日実績' +'\n'+
+            '※残在庫多い順'+'\n'+'\n'+
+           '1位 ' + str([ i[0] for i in HappyBagInventory.values][0]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][0]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][0]) + '\n' +'\n' 
+           
+           '2位 ' + str([ i[0] for i in HappyBagInventory.values][1]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][1]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][1]) + '\n' +'\n' 
+           
+           
+           '3位 ' + str([ i[0] for i in HappyBagInventory.values][2]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][2]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][2]) + '\n' +'\n' 
+           
+           
+           '4位 ' + str([ i[0] for i in HappyBagInventory.values][3]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][3]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][3]) + '\n' +'\n' 
+           
+           
+           '5位 ' + str([ i[0] for i in HappyBagInventory.values][4]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][4]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][4]) + '\n' +'\n' 
+           
+           
+           '6位 ' + str([ i[0] for i in HappyBagInventory.values][5]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][5]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][5]) + '\n' +'\n' 
+           
+           
+           '7位 ' + str([ i[0] for i in HappyBagInventory.values][6]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][6]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][6]) + '\n' +'\n' 
+           
+           
+           '8位 ' + str([ i[0] for i in HappyBagInventory.values][7]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][7]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][7]) + '\n' +'\n' 
+           
+           
+           '9位 ' + str([ i[0] for i in HappyBagInventory.values][8]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][8]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][8]) + '\n' +'\n' 
+           
+           
+           '10位 ' + str([ i[0] for i in HappyBagInventory.values][9]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][9]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][9]) + '\n' +'\n' 
+           
+           '11位 ' + str([ i[0] for i in HappyBagInventory.values][10]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][10]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][10]) + '\n' +'\n' 
+           
+           '12位 ' + str([ i[0] for i in HappyBagInventory.values][11]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][11]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][11]) + '\n' +'\n' 
+           
+           '13位 ' + str([ i[0] for i in HappyBagInventory.values][12]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][12]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][12]) + '\n' +'\n' 
+           
+           '14位 ' + str([ i[0] for i in HappyBagInventory.values][13]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][13]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][13]) + '\n' +'\n' 
+           
+           '15位 ' + str([ i[0] for i in HappyBagInventory.values][14]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][14]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][14]) + '\n' +'\n' 
+           
+           '16位 ' + str([ i[0] for i in HappyBagInventory.values][15]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][15]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][15]) + '\n' +'\n' 
+           
+           '17位 ' + str([ i[0] for i in HappyBagInventory.values][16]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][16]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][16]) + '\n' +'\n' 
+           
+           '18位 ' + str([ i[0] for i in HappyBagInventory.values][17]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][17]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][17]) + '\n' +'\n' 
+           
+           '19位 ' + str([ i[0] for i in HappyBagInventory.values][18]) + '\n' +
+           ' 残在庫数 ' + str([ "🌟完売" if i[1] == 0 else i[1] for i in HappyBagInventory.values ][18]) + '　販売数' + str([ i[2] for i in HappyBagInventory.values][18]) + '\n' +'\n' 
+           
+           'よろしくお願い致します。' + '\n' +'\n' 
+           
+           '古内' + '\n' +'\n' 
+
+           )
+
+#(+'\n'+'岐阜'+str(p5)+'\n'+'長町'+str(p6)+'\n'+'船橋'+str(p7)+'\n'+'富士見'+str(p8)+'\n'+'レイク'+str(p9)+'\n'+'海老名')
+#(+str(p10)+'\n'+'むさし'+str(p11)+'\n'+'平塚'+str(p12)+'\n'+'名取'+str(p13)+'\n'+'大高'+str(p14)+'\n'+'東郷町'+str(p15)+'\n'+'太田'+str(p16)+'\n'+'水戸'+str(p17)+'\n'+'EXPO'+str(p18)+'\n'+'川崎'+str(p19)+'\n'+'新三郷'+str(p20)+'\n'+'詳細はOneDriveの【シフト管理】売上実績ファイルを参照下さい！')
+payload = {'message': message_1}
+requests.post(api_url, headers=headers, params=payload)   
+#print("SUCCESSFULL!!")
+
+print("SUCCESSFULL!!")
+
+#xlpy.load_workbook()
+
+# from season_ana import season_analysis
+
+
+# season_analysis()
+
+
