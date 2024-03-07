@@ -1,0 +1,372 @@
+import selenium
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import openpyxl as pyxl
+import pandas as pd
+import shutil
+from operator import itemgetter
+import os
+import numpy as np
+import datetime
+from datetime import timedelta
+import time
+import math
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
+import os
+import requests
+import calendar
+
+USER = "古内翔平"
+
+ToDay = datetime.date.today()
+y = ToDay.year
+m = ToDay.month
+d = ToDay.day
+
+
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))#options=chrome_options)#2021 0724 
+#フォーム   
+#File1 = "C:/Users/古内翔平/Desktop/lmember_data.xlsx"
+
+#2024年度ファイル
+File1 = "C:/Users/{}/Desktop/{}lmember_data.xlsx".format(USER,str(int(y)).zfill(4))
+WB = pyxl.load_workbook(File1)
+WS = WB["取得データ"]
+WS_lastrow = WS.max_row
+
+WS2 = WB["POSデータ"]
+WS2_lastrow = WS2.max_row
+
+WS3 = WB["集計"]
+
+
+m_count_list = []
+for m_n in range(1,m ):
+    m_c = calendar.monthrange(y,m_n)[1]
+    m_count_list.append(m_c)
+
+match_rowno = sum(m_count_list) + 4 + d
+print(4 + match_rowno + d) 
+
+
+SELECT_DATE = str(y) + "/" +str(int(m)) + "/" + str(int(d))
+
+#ーーーーーーーー前回ダウンロードファイル削除ーーーーーーーーーー
+
+dr_files = 'C:/Users/{}/Desktop/Lmembers/dataf'.format(USER)
+dr_read = os.listdir(dr_files)
+
+for file_name in dr_read:
+  del_f_path = dr_files + '/' + file_name#削除ファイルパスの設定
+  os.remove(del_f_path)#dataf内のファイルの削除
+  
+
+#販売NETデータの取得
+
+url2 = 'http://tri.hanbai-net.com/system/Login.aspx'
+
+driver.get(url2)
+
+id_1 = 'trinityadmin'
+id_2 = 'AdminTrinity'
+
+priod1 = str(y) + str(m).zfill(2) + str(d).zfill(2)
+priod2 = str(y) + str(m).zfill(2) + str(d).zfill(2)
+
+loginid_1 = driver.find_element(By.ID, "ContentPlaceHolder1_txtUserCode")
+loginid_2 = driver.find_element(By.ID, "ContentPlaceHolder1_txtPassword")
+
+loginid_1.send_keys(id_1)#ユーザーIDを入力
+loginid_2.send_keys(id_2)#パスワードを入力
+
+
+#ログインボタンをクリック
+driver.find_element(By.ID, "ContentPlaceHolder1_btnLogin").click()
+
+
+time.sleep(2)
+
+#金種明細一覧
+driver.get("http://tri.hanbai-net.com/system/30010401.aspx?id=010199")
+
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[1]").clear()
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[1]").send_keys(priod1)
+
+
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[2]").clear()
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[2]").send_keys(priod2)
+
+
+time.sleep(2)
+
+#CSV
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[1]/td[6]/div/table/tbody/tr/td/input[2]").click()
+
+time.sleep(5)
+
+filelists = []
+
+for file in os.listdir("C:/Users/{}/Downloads".format(USER)):#ディレクトリ内をfor文で取り出す
+    base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+    if ext == '.csv':#拡張子csvが一致した場合…
+        if base == '販売金種明細':
+            filelists.append([file, os.path.getctime("C:/Users/{}/Downloads/".format(USER) + str(file))])#filelistsに取り出したfileにダウンロード時間を追加
+            #print("file:{},csv:{}" .format(file,csv))
+            filelists.sort(key=itemgetter(0), reverse=True)#
+            MAX_CNT = 0
+            for i, file in enumerate(filelists):
+                if i > MAX_CNT-1:
+                    print(file[0])
+                    #file_1 = os.rename(i[0], 'kasi.csv')
+                    #os.rename("C:/Users/古内翔平/Downloads/" + str(file[0]), "C:/Users/古内翔平/Downloads/" + '全店.csv')
+                    shutil.move("C:/Users/{}/Downloads/".format(USER) + '販売金種明細.csv','C:/Users/{}/Desktop/Lmembers/dataf'.format(USER))                        
+time.sleep(1)                    
+
+#POS販売伝票一覧
+driver.get("http://tri.hanbai-net.com/system/30010201.aspx?id=010199")
+
+time.sleep(2)
+
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[1]").clear()
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[1]").send_keys(priod1)
+
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[2]").clear()
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[2]/td[3]/input[2]").send_keys(priod2)
+
+time.sleep(3)
+
+select_ele = driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[3]/td[5]/select")
+
+Select(select_ele).select_by_value("0")
+
+#CSV
+driver.find_element(By.XPATH,"/html/body/div/form/div[3]/span/table/tbody/tr[1]/td[7]/div/table/tbody/tr/td/input[2]").click()
+
+time.sleep(5)
+
+filelists = []
+
+for file in os.listdir("C:/Users/{}/Downloads".format(USER)):#ディレクトリ内をfor文で取り出す
+    base, ext = os.path.splitext(file)#splitextは拡張子を取得する関数
+    if ext == '.csv':#拡張子csvが一致した場合…
+        if base == '販売伝票一覧':
+            filelists.append([file, os.path.getctime("C:/Users/{}/Downloads/".format(USER) + str(file))])#filelistsに取り出したfileにダウンロード時間を追加
+            #print("file:{},csv:{}" .format(file,csv))
+            filelists.sort(key=itemgetter(0), reverse=True)#
+            MAX_CNT = 0
+            for i, file in enumerate(filelists):
+                if i > MAX_CNT-1:
+                    print(file[0])
+                    #file_1 = os.rename(i[0], 'kasi.csv')
+                    #os.rename("C:/Users/古内翔平/Downloads/" + str(file[0]), "C:/Users/古内翔平/Downloads/" + '全店.csv')
+                    shutil.move("C:/Users/{}/Downloads/".format(USER) + '販売伝票一覧.csv','C:/Users/{}/Desktop/Lmembers/dataf'.format(USER))                        
+time.sleep(1)    
+
+
+File2 = "C:/Users/{}/Desktop/Lmembers/dataf/販売金種明細.csv".format(USER)
+File3 = "C:/Users/{}/Desktop/Lmembers/dataf/販売伝票一覧.csv".format(USER)
+
+#販売金種明細.csv
+r_File2 = pd.read_csv(File2,encoding="cp932")
+df2 = pd.DataFrame(r_File2)
+
+#販売伝票一覧.csv
+r_File3 = pd.read_csv(File3,encoding="cp932")
+df3 = pd.DataFrame(r_File3)
+
+app_counter = len(df2[df2["金種名"] == "APPポイント利用"])
+
+app_use_list = df2[df2["金種名"] == "APPポイント利用"]
+
+Create_App_Use_List = []
+print(app_use_list)
+for data in app_use_list.values:
+    print(data)
+    
+    hit_data = df3[df3["伝票番号"] == data[0]]
+    hit_data_subtotal = hit_data["販売小計金額"].values
+    hit_data_datetime = hit_data["登録日時"].values
+    
+    if len(hit_data_subtotal) == 0:
+        hit_data_subtotal = [0]
+        hit_data_datetime = ["登録データなし"]
+        
+
+    
+    print(hit_data_subtotal)
+    
+    
+    data1 = pd.DataFrame([{"伝票番号":data[0],"店舗名":data[3],"金種名":data[5],"受取金額":data[8],"販売小計金額":hit_data_subtotal[0],"登録日時":hit_data_datetime[0]}])
+    Create_App_Use_List.append(data1)
+try:
+    Concat_Create_App_Use_List = pd.concat(Create_App_Use_List)   
+
+    POS_count1 = len(Concat_Create_App_Use_List)
+    POS_APP_USE = sum(Concat_Create_App_Use_List["受取金額"].values)
+    POS_SALES = sum(Concat_Create_App_Use_List["販売小計金額"].values)
+    
+
+
+    row_counter = 1
+    for data2 in Concat_Create_App_Use_List.values:
+        WS2["A" + str(WS2_lastrow + row_counter)].value = data2[0]
+        WS2["B" + str(WS2_lastrow + row_counter)].value = data2[1]
+        WS2["C" + str(WS2_lastrow + row_counter)].value = data2[2]
+        WS2["D" + str(WS2_lastrow + row_counter)].value = data2[3]
+        WS2["E" + str(WS2_lastrow + row_counter)].value = data2[4]
+        WS2["F" + str(WS2_lastrow + row_counter)].value = data2[5]
+        WS2["G" + str(WS2_lastrow + row_counter)].value = SELECT_DATE
+        
+        
+        row_counter += 1
+        
+except ValueError:    
+    
+    POS_count1 = 0
+    POS_APP_USE = 0
+    POS_SALES = 0
+    
+
+WS3["F" + str(match_rowno) ].value = POS_count1
+WS3["G" + str(match_rowno) ].value = POS_APP_USE
+WS3["H" + str(match_rowno) ].value = POS_SALES
+
+
+
+#Lメンバーズデータ取得
+
+url = 'https://www.l-members.me/'
+
+ID = "fun-lmembers@fun-funky.net"
+PASS = "Trinity0130"
+
+Lmem_count1 = []
+Lmem_APP_USE = []
+Lmem_SALES = []
+
+
+driver.get(url)
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div/div/div/div[2]/form/div[1]/input").send_keys(ID)
+
+driver.find_element(By.XPATH,"/html/body/div/div/div/div[2]/form/div[2]/input").send_keys(PASS)
+
+driver.find_element(By.XPATH,"/html/body/div/div/div/div[2]/form/div[4]/input").click()
+
+time.sleep(3)
+
+print(1)
+
+driver.find_element(By.XPATH,"/html/body/div/div[1]/div/a[3]").click()
+
+
+print(2)
+
+driver.find_element(By.XPATH,"/html/body/div/div[1]/div/a[3]").click()
+
+time.sleep(2)
+print(3)
+
+
+select = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/div[2]/div[1]/select")
+Select(select).select_by_value("100")
+
+driver.find_element(By.XPATH,"/html/body/div/div[2]/div/div[2]/div[1]/a").click()
+
+print(4)
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div/div[4]/div/div/div[2]/form/div[4]/div/div/input[1]").send_keys(100)
+
+time.sleep(3)
+
+
+driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div/div[4]/div/div/div[2]/form/div[6]/div/div/input[1]").send_keys("00{}/{}/{}".format(str(int(y)).zfill(4),str(int(m)).zfill(2),str(int(d)).zfill(2)))
+driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div/div[4]/div/div/div[2]/form/div[6]/div/div/input[2]").send_keys("00{}/{}/{}".format(str(int(y)).zfill(4),str(int(m)).zfill(2),str(int(d) + 1).zfill(2)))
+
+time.sleep(2)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div/div[4]/div/div/div[2]/form/input[2]").click()
+
+time.sleep(3)
+
+# select = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/div[2]/div[1]/select")
+# Select(select).select_by_value("100")
+
+try:
+    for i in range(1,101):
+        member_id = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[1]".format(i)).text
+
+        member_name = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[2]".format(i)).text
+
+        subtotal = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[3]".format(i)).text
+
+        use_point = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[4]".format(i)).text
+
+        total = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[5]".format(i)).text
+
+        reduction_point = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[6]".format(i)).text
+
+        reg_date = driver.find_element(By.XPATH,"/html/body/div/div[2]/div/table/tbody/tr[{}]/td[7]".format(i)).text
+        
+        print(member_id,member_name,subtotal,use_point,total,reduction_point,reg_date)
+        
+        WS["A" + str(WS_lastrow + i)].value = member_id
+        WS["B" + str(WS_lastrow + i)].value = member_name
+        WS["C" + str(WS_lastrow + i)].value = int(subtotal.replace("¥","").replace(",",""))
+        WS["D" + str(WS_lastrow + i)].value = int(use_point.replace("-","").replace("pt",""))
+        WS["E" + str(WS_lastrow + i)].value = int(total.replace("¥","").replace(",",""))
+        WS["F" + str(WS_lastrow + i)].value = int(reduction_point.replace("+","").replace("pt",""))
+        WS["G" + str(WS_lastrow + i)].value = reg_date
+        WS["J" + str(WS_lastrow + i)].value = SELECT_DATE
+        
+        Lmem_count1.append(1)
+        Lmem_APP_USE.append(int(use_point.replace("-","").replace("pt","")))
+        Lmem_SALES.append(int(subtotal.replace("¥","").replace(",","")))
+  
+        try:
+            match_data = Concat_Create_App_Use_List[(Concat_Create_App_Use_List["受取金額"].values  == int(use_point.replace("-","").replace("pt",""))) &  (Concat_Create_App_Use_List["販売小計金額"].values  == int(subtotal.replace("¥","").replace(",","")))]
+            print("マッチ",match_data["販売小計金額"].values)
+            
+            WS["H" + str(WS_lastrow + i)].value = match_data["販売小計金額"].values[0]
+            WS["I" + str(WS_lastrow + i)].value = match_data["受取金額"].values[0]
+            
+        except:
+            
+            WS["H" + str(WS_lastrow + i)].value = "一致データなし"
+            WS["I" + str(WS_lastrow + i)].value = "一致データなし"
+                
+            
+except:
+    print("END")
+    
+WS3["C" + str(match_rowno) ].value = sum(Lmem_count1)
+WS3["D" + str(match_rowno) ].value = sum(Lmem_APP_USE)
+WS3["E" + str(match_rowno) ].value = sum(Lmem_SALES) 
+    
+    
+    
+#WB.save("C:/Users/古内翔平/Desktop/{}lmember_data.xlsx".format("2024"))  
+WB.save("C:/Users/{}/Desktop/{}lmember_data.xlsx".format(USER,str(y)))   
+        
+    
+    
+    
+    
+    
+    
+    
+    
+
+
