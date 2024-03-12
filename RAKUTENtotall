@@ -1,0 +1,536 @@
+
+import time
+import selenium
+from selenium import webdriver
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver import ChromeOptions
+from selenium.webdriver.common.by import By
+import datetime
+import os
+import glob
+import shutil
+from operator import itemgetter
+import datetime
+import pandas as pd
+import re
+import numpy as np
+import collections
+import requests
+import openpyxl as pyxl
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeServeice
+import math
+
+
+
+ToDay = datetime.date.today() - datetime.timedelta(days=1)
+Y = ToDay.year
+M = ToDay.month
+D = ToDay.day
+
+TargetDate = str(Y) + "/" + str(M).zfill(2) + "/" + str(D).zfill(2)
+
+USER = "古内翔平"
+DATAFOLDER = "C:/Users/{}/Desktop/楽天データ/".format(USER)
+base_path = 'C:/Users/{}'.format(USER)
+
+#del_folder_path = "C:/Users/古内翔平/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/4⃣販売部/古内/myfile/basket-analysis/data-folder"#削除対象フォルダー
+
+del_read = os.listdir(DATAFOLDER)#削除対象のディレクトリ内のファイル名を取得
+
+print("ファイルを削除")
+for file_name in del_read:
+    del_f_path = DATAFOLDER + file_name#削除ファイルパスの設定
+    os.remove(del_f_path)#dataf内のファイルの削除
+
+#置き換えリスト
+ReDataList = os.path.join(base_path , 'OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/6⃣EC部/SHOPLIST品番置換え.xlsx')
+r_ReDataList = pd.read_excel(ReDataList)
+df_ReDataList = pd.DataFrame(r_ReDataList) 
+
+#カラーリスト
+ColorList = "C:/Users/{}/Desktop/カラー一覧.xlsx".format(USER)
+r_ColorList = pd.read_excel(ColorList)
+df_ColorList = pd.DataFrame(r_ColorList) 
+
+Color_List = {}
+
+for c_n in df_ColorList.values:
+    Color_List[c_n[2]] = c_n[0]
+    
+
+#サイズリスト
+SizeList = "C:/Users/{}/Desktop/サイズ一覧.xlsx".format(USER)
+r_SizeList = pd.read_excel(SizeList)
+df_SizeList = pd.DataFrame(r_SizeList) 
+
+Size_List = {}
+
+for s_n in df_SizeList.values:
+    Size_List[s_n[1]] = s_n[0]
+
+
+
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+driver = webdriver.Chrome(service=ChromeServeice(ChromeDriverManager().install()))#ChromeDriverManager().install())
+
+
+#販売NETスクレイピング
+hanbaiNET_URL = 'http://tri.hanbai-net.com/system/Login.aspx'
+driver.get(hanbaiNET_URL)
+
+id_1 = 'trinityadmin'
+id_2 = 'AdminTrinity'
+
+
+loginid_1 = driver.find_element(By.ID, "ContentPlaceHolder1_txtUserCode")
+loginid_2 = driver.find_element(By.ID, "ContentPlaceHolder1_txtPassword")
+
+loginid_1.send_keys(id_1)#ユーザーIDを入力
+loginid_2.send_keys(id_2)#パスワードを入力
+
+
+#ログインボタンをクリック
+driver.find_element(By.ID, "ContentPlaceHolder1_btnLogin").click()
+
+
+time.sleep(2)
+
+driver.get("http://tri.hanbai-net.com/system/10010801.aspx?id=010199")
+
+time.sleep(2)
+
+driver.find_element(By.XPATH,'/html/body/div/form/div[3]/span/table/tbody/tr[1]/td[9]/div/table/tbody/tr/td/input[3]').click()
+
+time.sleep(5)
+filelists = []
+key_word1 = "分類２マスタ"
+for file in os.listdir("C:/Users/{}/Downloads".format(USER)):#ディレクトリ内をfor文で取り出す
+    
+    print(file)
+    
+    if key_word1 in file:
+
+        #os.rename("C:/Users/{}/Downloads/".format(USER) + file,"C:/Users/{}/Downloads/".format(USER) + '分類２マスタ.csv')
+        shutil.move("C:/Users/{}/Downloads/".format(USER) + '分類２マスタ.csv',DATAFOLDER + '分類２マスタ.csv')                        
+
+time.sleep(3)     
+
+#driver.close() 
+
+#楽天サイトスクレイピング
+
+URL = "https://glogin.rms.rakuten.co.jp/"
+driver.get(URL)
+ID1 = "funrakutenichiba"
+PASS1 = "trinity8434d"
+
+ID2 = "fun-furuuchi@fun-funky.net"
+PASS2 = "fun1024"
+
+
+driver.find_element(By.XPATH,"/html/body/div[2]/main/div/section[1]/form/p[1]/span[2]/input").send_keys(ID1)
+driver.find_element(By.XPATH,"/html/body/div[2]/main/div/section[1]/form/p[2]/span[2]/input").send_keys(PASS1)
+
+time.sleep(2)
+driver.find_element(By.XPATH,"/html/body/div[2]/main/div/section[1]/form/p[4]/button").click()
+
+time.sleep(3)
+driver.find_element(By.XPATH,"/html/body/div/main/div/section[2]/form/p[1]/span[2]/input").send_keys(ID2)
+
+driver.find_element(By.XPATH,"/html/body/div/main/div/section[2]/form/p[2]/span[2]/input").send_keys(PASS2)
+
+time.sleep(2)
+driver.find_element(By.XPATH,"/html/body/div/main/div/section[2]/form/p[4]/button").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/main/form/div/section/div/div/div/div/button").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/main/div/div[3]/dl[2]/dd/a").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div/div/section/form/p/button").click()
+print("4")
+time.sleep(3)
+
+# driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[2]/ul[4]/li[3]/a/div/span[2]").click()
+
+# print("5")
+
+# time.sleep(5)
+
+try:
+
+    driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[1]/ul/li[5]/a").click()
+    print("test")
+
+    time.sleep(3)
+    
+except:
+    print("広告を閉じる")
+    driver.find_element(By.XPATH,"/html/body/div[7]/div/div[9]/div/div/div[1]/span/a").click()  
+    
+    time.sleep(3)
+    
+    print("リトライ")
+    driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[1]/ul/li[5]/a").click()
+    print("test")
+
+    time.sleep(5) 
+
+#売上データの取得
+print("売上データの取得")
+#driver.find_element(By.XPATH,"/html/body/div[1]/div/aside/nav[2]/ul/li[4]/button").click()
+
+#time.sleep(3)
+
+
+driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[2]/ul[4]/li[4]/a").click()
+print()
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/div/div[1]/div/section[2]/div/div[2]/div[1]/div/div/div/a").click()
+#driver.get("https://datatool.rms.rakuten.co.jp/access/item")
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table/tbody/tr/td/table/tbody/tr[1]/td[2]/table/tbody/tr/td[1]/input").clear()
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table/tbody/tr/td/table/tbody/tr[1]/td[2]/table/tbody/tr/td[1]/input").send_keys(TargetDate)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table/tbody/tr/td/table/tbody/tr[1]/td[2]/table/tbody/tr/td[5]/input").clear()
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table/tbody/tr/td/table/tbody/tr[1]/td[2]/table/tbody/tr/td[5]/input").send_keys(TargetDate)
+
+time.sleep(2)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table[1]/tbody/tr/td/table/tbody/tr[3]/td[2]/table/tbody/tr/td[1]/font/input").click()
+
+time.sleep(2)
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/table[1]/tbody/tr/td/table/tbody/tr[4]/td/input[2]").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/form/form/table/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[1]/td/table/tbody/tr[1]/td[3]/input").click()
+
+print("ダウンロード開始")
+
+
+
+time.sleep(7)
+
+
+filelists = []
+key_word1 = "RDR_item_basket_"
+for file in os.listdir("C:/Users/{}/Downloads".format(USER)):#ディレクトリ内をfor文で取り出す
+    
+    print(file)
+    
+    if key_word1 in file:
+
+        os.rename("C:/Users/{}/Downloads/".format(USER) + file,"C:/Users/{}/Downloads/".format(USER) + '楽天売上データ.csv')
+        shutil.move("C:/Users/{}/Downloads/".format(USER) + '楽天売上データ.csv',DATAFOLDER + '楽天売上データ.csv')                        
+
+time.sleep(3)        
+
+SizeMST_Path = DATAFOLDER + '分類２マスタ.csv'
+SizeMST = pd.read_csv(SizeMST_Path,encoding='cp932')
+"分類２コード"
+"分類２名"
+
+FILE_PATH = os.path.join(DATAFOLDER ,'楽天売上データ.csv')
+print(FILE_PATH)
+r_file = pd.read_csv(FILE_PATH, encoding="cp932",skiprows=4)
+
+df_file = pd.DataFrame(r_file)
+
+print(df_file["商品番号"].values)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[1]/ul/li[1]/a").click()
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[1]/ul/li[5]/a").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/aside/nav[2]/ul[4]/li[3]/a").click()
+
+time.sleep(3)
+
+driver.find_element(By.XPATH,"/html/body/div[1]/main/div/div/div[1]/div/section[2]/div/div[2]/div[3]/div/div/div/a").click()
+
+time.sleep(5)
+
+try:
+    item_counter = 1
+
+    for n_cd in df_file["商品番号"].values:
+
+        driver.find_element(By.XPATH,"/html/body/div[1]/div/main/div[1]/div/div[4]/div[2]/div/div/div[2]/div/input").clear()
+        driver.find_element(By.XPATH,"/html/body/div[1]/div/main/div[1]/div/div[4]/div[2]/div/div/div[2]/div/input").send_keys(n_cd)
+        time.sleep(2)
+        driver.find_element(By.XPATH,"/html/body/div[1]/div/main/div[1]/div/table/tbody/tr/td[4]/div/button").click()
+        time.sleep(2)
+        driver.find_element(By.XPATH,"/html/body/div[1]/div/main/div[1]/div/table/tbody/tr/td[4]/div/button").click()
+        #/html/body/div[1]/div/main/div[1]/div/table/tbody/tr/td[4]/div/button
+        
+        time.sleep(7)
+        filelists = []
+        key_word2 = "_item_sku_"
+        for file in os.listdir("C:/Users/{}/Downloads".format(USER)):#ディレクトリ内をfor文で取り出す
+            
+            print(file)
+            
+            if key_word2 in file:
+
+                os.rename("C:/Users/{}/Downloads/".format(USER) + file,"C:/Users/{}/Downloads/".format(USER) + '楽天売上データSKU{}.csv'.format(item_counter))
+                shutil.move("C:/Users/{}/Downloads/".format(USER) + '楽天売上データSKU{}.csv'.format(item_counter),DATAFOLDER + '楽天売上データSKU{}.csv'.format(item_counter))     
+                
+                time.sleep(5)
+                item_counter += 1                   
+
+        time.sleep(3)        
+
+except:
+    print("end")
+    
+TTL_FILE = []    
+    
+FILE_COUNT = len(os.listdir(DATAFOLDER)) - 1
+for file_no in range(1,FILE_COUNT):
+    
+    r_file2 = pd.read_csv(DATAFOLDER + '楽天売上データSKU{}.csv'.format(file_no),skiprows=5)
+    df2 = pd.DataFrame(r_file2)
+    #print(df2)
+    
+    Match_Data = df2[df2["売上個数"] > 0]
+    
+    
+    TTL_FILE.append(Match_Data)
+
+df_file = pd.concat(TTL_FILE)     
+print(df_file)
+    
+    
+#売上出力
+OUTPUT_FILE = 'C:/Users/{}/OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/6⃣EC部/RAKUTEN_DATA_OUTPUT/●外部データ連携_売上返品データ(RAKUTEN).xlsx'.format(USER)
+#
+C_element = '0' #現金区分
+D_element = '009998' #担当者コード
+F_element = "20001005"
+J_element = '20001005'
+L_element = '01'
+R_element = '0'#上代単価
+S_element = '0'
+T_element = '0'
+
+# r_file = pd.read_csv(file_path,encoding="cp932")
+# df_file = pd.DataFrame(r_file)
+
+
+#商品ユニークリスト
+print("確認",df_file["システム連携用SKU番号"].values)
+#UNQ_list = np.unique(pd.DataFrame(df_file["システム連携用SKU番号"].values,columns=["商品番号"]))
+UNQ_list = np.unique(pd.DataFrame(df_file["商品番号"].values,columns=["商品番号"]))
+
+#item_cd = pd.DataFrame(df_file["商品番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号"])
+item_cd = pd.DataFrame(df_file["商品番号"].values,columns=["商品番号"])
+item_name = pd.DataFrame(df_file["商品名"],columns=["商品名"])
+item_color2 = pd.DataFrame(df_file["システム連携用SKU番号"].astype('str').str.zfill(10).str[:10].values,columns=["商品番号2"])
+item_quantity = pd.DataFrame(df_file['売上個数'].values,columns=["数量"])
+item_amount = pd.DataFrame(df_file['売上'].values,columns=["金額"])
+item_size = pd.DataFrame(df_file['SKU項目2'].values,columns=["サイズ"])
+item_color = pd.DataFrame(df_file['SKU項目1'].values,columns=["カラー"])
+
+print(item_cd,item_name,item_quantity,item_amount,item_size,item_color)
+concat_list = pd.concat([item_cd,item_quantity,item_amount,item_size,item_color],axis=1)
+
+
+print(concat_list)
+
+item_list = []
+for i in UNQ_list:
+    # print(i)
+    # print(concat_list["商品番号"])
+    #for i,i2,i3,i4 in zip(item_cd.values,item_name.values,item_quantity.values,item_amount.values):
+    
+    element = len(str(i))
+    datas = concat_list[concat_list["商品番号"].values == i]
+    
+    print("test",datas)
+    for data_i in datas.values:
+        color_data  = Color_List[data_i[4]]
+        print(data_i[3])
+        # print(Size_List.keys())
+        # print(Size_List.values())
+        size_data = Size_List[data_i[3]]
+        
+
+        if element == 12 :
+            element1 = str(i)[:10]
+            element2 = str(i)[10:11].zfill(2)
+            element3 = str(i)[11:]
+            # print(element1,element2,element3)
+            
+        elif element == 14 :
+            
+            element1 = str(i)[:10]
+            element2 = str(i)[10:11].zfill(2)
+            element3 = str(i)[11:]
+            # print(element1,element2,element3) 
+            
+        elif element == 15 :
+            element1 = str(i)[:10]
+            element2 = str(i)[10:12].zfill(2)
+            element3 = str(i)[12:]
+            
+            
+        else:
+            element1 = str(i)[:10]
+            element2 = str(i)[10:12].zfill(2)
+            element3 = str(i)[12:]
+
+    #names = datas["商品名"].values[0]
+    #element3 = ""
+    
+    data = pd.DataFrame({"商品番号":[data_i[0]],"商品名":[""],"カラー":[color_data],"サイズ":[size_data],"数量":[data_i[1]],"金額":[data_i[2]]})
+    
+    
+    item_list.append(data)
+
+compe_list = pd.concat(item_list)
+
+# print(compe_list)
+#==================== 出力 ======================
+
+wb = pyxl.load_workbook(OUTPUT_FILE)
+
+
+sheet_name = str(Y) + str(M).zfill(2) + 'URI'
+sheetnamelist = wb.sheetnames
+
+if sheet_name in sheetnamelist:
+    # print("あります")
+    ws = wb[str(sheet_name)]
+    # print(ws)
+    
+else:
+    # print("ありません")  
+    source = wb["URI"]
+    
+    copy_ = wb.copy_worksheet(source)
+    copy_.title = sheet_name
+
+ws = wb[str(sheet_name)]
+
+
+#最終行
+last_row = ws.max_row 
+# print("最終行",last_row) 
+
+index_n = 1
+row_n = 1
+
+for insert_data in compe_list.values:
+
+    item_CD = insert_data[0]
+    item_NAME = insert_data[1]
+    item_COLOR = insert_data[2]
+    item_SIZE = insert_data[3]
+    item_QUANTITY = insert_data[4]
+    item_AMAUNT = insert_data[5]
+    
+    K_element = str(Y).zfill(4) + str(M).zfill(2) + str(D).zfill(2)  + str(row_n).zfill(4)
+    #K_element = str(year_n).zfill(4) + str(month_n).zfill(2) + str(day_n).zfill(2)  + str(last_row + row_n).zfill(4)
+
+
+    ws["A" + str(last_row + index_n )].value = str(Y) + str(M).zfill(2) + str(D).zfill(2)
+    ws["B" + str(last_row + index_n )].value = str(Y) + str(M).zfill(2) + str(D).zfill(2)
+    ws["C" + str(last_row + index_n )].value = C_element
+    ws["D" + str(last_row + index_n )].value = D_element
+    
+    for macth_CD,macth_Color,macth_Size,change_CD,change_Color,change_Size in zip(
+                                    df_ReDataList["SHOPLIST"].values,
+                                    df_ReDataList["横選択肢"].values,
+                                    df_ReDataList["縦選択肢"].values,
+                                    df_ReDataList["アラジン"].values,
+                                    df_ReDataList["カラー"].values,
+                                    df_ReDataList["サイズ"].values,
+                                    ):
+        # print(item_CD,macth_CD)
+        # print("チェック１",str(item_CD), str(macth_CD),"\n","チェック２",str(item_COLOR),str(macth_Color),"\n","チェック３",str(item_SIZE) , str(macth_Size),"\n")
+        if (str(item_CD) == str(macth_CD)) & (str(item_COLOR) == str(macth_Color)) & (str(item_SIZE) == str(macth_Size)):
+            item_CD = change_CD
+            # print("変換")
+            
+            # print(item_CD,"⇒",change_CD)
+        
+
+    ws["M" + str(last_row + index_n )].value = item_CD
+    
+    ws["N" + str(last_row + index_n )].value = item_NAME
+    
+    
+    ws["F" + str(last_row + index_n )].value = F_element
+    ws["J" + str(last_row + index_n )].value = J_element
+    ws["K" + str(last_row + index_n )].value = K_element
+    ws["L" + str(last_row + index_n )].value = L_element
+    
+    ws["P" + str(last_row + index_n)].value = item_COLOR
+    ws["Q" + str(last_row + index_n)].value = item_SIZE 
+    ws["R" + str(last_row + index_n )].value = R_element
+    ws["S" + str(last_row + index_n )].value = S_element
+    ws["T" + str(last_row + index_n )].value = T_element
+    
+    ws["U" + str(last_row + index_n)].value = item_QUANTITY
+    
+    try :
+        ws["V" + str(last_row + index_n)].value = math.ceil(item_AMAUNT/item_QUANTITY)#商品単価
+        
+    except ZeroDivisionError:
+        ws["V" + str(last_row + index_n)].value = 0#商品単価
+        
+    except :
+        item_AMAUNT = np.nan_to_num(item_AMAUNT,0)
+        ws["V" + str(last_row + index_n)].value = 0
+        
+        
+    ws["W" + str(last_row + index_n)].value = math.ceil(item_AMAUNT * 1.1)#税込金額
+    
+    index_n += 1
+    row_n += 1
+    
+    wb.save(os.path.join(base_path , 'OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/6⃣EC部/RAKUTEN_DATA_OUTPUT/●外部データ連携_売上返品データ(RAKUTEN).xlsx')
+    )
+
+    #==============================================================================================
+    #出力ログを記録
+    # try:
+    #     log_ws["C" + str(log_last_row + 1)].value = sum(concat_list["金額"].values)
+    #     log_ws["D" + str(log_last_row + 1)].value = sum(concat_list["数量"].values)
+    #     log_ws["E" + str(log_last_row + 1)].value = "出力完了"
+    # except :
+    #     log_ws["E" + str(log_last_row + 1)].value = "出力エラー"
+            
+
+    #log_wb.save(os.path.join(base_path , 'OneDrive - 株式会社　ＴＲＩＮＩＴＹ　/業務会議/6⃣EC部/SHOPLIST売上出力ログ.xlsx'))
+    #==============================================================================================
+    
+TOKEN = 'NxPDQg0tpI4oY6BZHo7vkZ3gxPtTIijpWFyN85xL2q1'#テストの部屋トークン
+#TOKEN = 'TNKXBcpEMmK4JAmRPaOyVABkA5GWIJkIHQOnsyfu4MD'#FUNの部屋トークン
+api_url = 'https://notify-api.line.me/api/notify'
+headers = {'Authorization' : 'Bearer ' + TOKEN}
+
+message_1 = (
+    'RAKUTEN  ' + str(TargetDate) + ' 売上報告' +  "\n\n" + "売上実績 " + str(sum(concat_list["金額"].values)) +  "\n売上点数 " + str(sum(concat_list["数量"].values)) + "\n\n出力完了しました。"
+
+)
+payload = {'message': message_1}
+requests.post(api_url, headers=headers, params=payload)   
+print("SUCCESSFULL!!")        
+
+      
