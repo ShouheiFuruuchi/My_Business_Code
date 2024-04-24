@@ -1,0 +1,99 @@
+import win32com.client
+import openpyxl as pyxl
+import datetime
+
+FILEPATH = "C:/Users/古内翔平/Desktop/お問い合わせ集計.xlsx"
+
+WB = pyxl.load_workbook(FILEPATH)
+WS = WB["Sheet1"]
+end_row = WS.max_row
+
+TODAY  =datetime.date.today()
+Y = TODAY.year
+M = TODAY.month
+D = 22#TODAY.day
+
+SELECT_DATE = "{}-{}-{}".format(Y,str(M).zfill(2),str(D).zfill(2))
+
+
+
+outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+
+accounts = outlook.Folders
+inbox = outlook.GetDefaultFolder(6)
+
+mails = inbox.Items
+print(mails)
+counter = 1
+for mail in mails:
+    
+    
+    if str(SELECT_DATE) in  str(mail.receivedtime) :
+
+
+        if mail.sendername == "customer@fun-funky.net":
+   
+            def Sender():
+
+                target1 = "【  お名前  】"
+                target2 = "【   MAIL   】"
+                
+                idx_start = str(mail.body).find(target1)
+                find_sender = str(mail.body)[idx_start + len(target1):]
+                idx_end = find_sender.find(target2)
+                find_sender2 = find_sender[:idx_end + len(target2)].replace(target2,"")
+
+                return find_sender2
+            
+            def Title():
+
+                target1 = "【 タイトル 】"
+                target2 = "【"
+                
+                idx_start = str(mail.body).find(target1)
+                find_title = str(mail.body)[idx_start + len(target1):]
+                idx_end = find_title.find(target2)
+                find_title2 = find_title[:idx_end + len(target2)].replace(target2,"")
+
+                return find_title2
+            
+            
+            def Text():
+
+                target1 = "【   内容   】"
+                target2 = "=============================================================="
+                
+                idx_start = str(mail.body).find(target1)
+                find_text = str(mail.body)[idx_start + len(target1):]
+                idx_end = find_text.find(target2)
+                find_text2 = find_text[:idx_end + len(target2)].replace(target2,"").replace("　","").lstrip()
+
+                return find_text2
+            
+            def DateTime():
+
+                target1 = "送信日時："
+                target2 = "送信元IP"
+                
+                idx_start = str(mail.body).find(target1)
+                find_datetime = str(mail.body)[idx_start + len(target1):]
+                idx_end = find_datetime.find(target2)
+                find_datetime2 = find_datetime[:idx_end + len(target2)].replace(target2,"")
+
+                return find_datetime2
+            datetime_str = DateTime()
+            sender = Sender()
+            title = Title()
+            text = Text()
+            
+            print(sender,title,text,datetime_str)
+
+
+            WS["A" + str(end_row + counter)].value = datetime_str
+            WS["B" + str(end_row + counter)].value = sender
+            WS["C" + str(end_row + counter)].value = title
+            WS["D" + str(end_row + counter)].value = text
+            
+            counter += 1
+
+WB.save(FILEPATH)           
