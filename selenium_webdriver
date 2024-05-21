@@ -1,0 +1,110 @@
+import datetime
+import requests
+
+import selenium
+from selenium import webdriver
+import time
+from datetime import timedelta
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.service import Service as ChromeServeice
+from webdriver_manager.chrome import ChromeDriverManager
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+
+#ーーーーーーー販売NETスクレイピングーーーーーーーーーーー
+
+week = ['月','火','水','木','金','土','日']
+w_day = '{:%Y%m%d}'.format(datetime.datetime.today())
+
+year = w_day[0:4]
+month = w_day[4:6]
+#day = int(w_day[6:8]) + 1#変更前
+day = w_day[6:8] #+ 1
+#week_day_type = datetime.date(int(year), int(month), int(day)).isocalendar()[2] - 1
+w_day_df = datetime.datetime.strptime(str(year) + '-' + str(month) + '-' + str(day), '%Y-%m-%d')
+
+day = w_day_df + timedelta(days = 1)
+year = str(day.year).zfill(4)
+month = str(day.month).zfill(2)
+day = str(day.day).zfill(2)
+target_day = str(year) + str(month)+ str(day).zfill(2)
+
+
+
+#week_no = datetime.date(int(year), int(month), int(day)).isocalendar()[1] + 1
+week_no = datetime.date(int(year), int(2), int(2)).isocalendar()[1] +1
+print(week_no)  # 53
+week_day_type = datetime.date(int(year), int(month), int(day)).isocalendar()[2] - 1
+#week_day_type = datetime.date(int(year), int(2), int(2)).isocalendar()[2] 
+
+print(week_day_type)
+print(week[week_day_type])
+
+url = 'http://tri.hanbai-net.com/system/Login.aspx'
+#driver = webdriver.Chrome('C:/Users/fun-f/Downloads/chromedriver.exe')#旧
+#driver = webdriver.Chrome('C:/Users/fun-f/Desktop/myfile/chromedriver.exe')
+from webdriver_manager.chrome import ChromeDriverManager
+
+driver = webdriver.Chrome(service=ChromeServeice(ChromeDriverManager().install()))#ChromeDriverManager().install())
+#driver = webdriver.Chrome("C:/Users/古内翔平/chromedriver.exe")#2021 0724
+#driver = webdriver.Chrome(options=chrome_options)#2021 0724
+
+#driver = webdriver.Chrome("C:/Users/fun-f/chromedriver.exe")#2021 0724
+
+driver.get(url)
+
+#id_1 = 'tenpo'
+#id_2 = 'tenpo'
+
+id_1 = 'trinityadmin'
+id_2 = 'AdminTrinity'
+
+loginid_1 = driver.find_element(By.ID, "ContentPlaceHolder1_txtUserCode")
+loginid_2 = driver.find_element(By.ID, "ContentPlaceHolder1_txtPassword")
+
+loginid_1.send_keys(id_1)#ユーザーIDを入力
+loginid_2.send_keys(id_2)#パスワードを入力
+
+
+
+driver.find_element(By.ID,"ContentPlaceHolder1_btnLogin").click() 
+time.sleep(2)
+#ログインボタンをクリック
+
+driver.get('http://tri.hanbai-net.com/system/00000000.aspx')
+driver.get('http://tri.hanbai-net.com/system/21024101.aspx?id=010199')
+
+driver.find_element(By.ID,"ContentPlaceHolder1_txtCond02").send_keys(target_day)#開始日を指定 ⇒ w_day
+driver.find_element(By.ID,"ContentPlaceHolder1_txtCond02_2").send_keys(target_day)#末日を指定 ⇒ w_day
+driver.find_element(By.ID,"ContentPlaceHolder1_RadioButton6").click()
+
+tenpo_list = {
+
+'柏':"01001008",
+'千葉':"01001009",
+'伊勢崎':"01001028",
+#'四條畷':'01001052',
+# 'TOKYO-BAY':'//*[@id="ContentPlaceHolder1_DropDownListCond04"]/option[6]',
+'富士見':"01001034",#7
+'越谷':"01001036",
+'海老名':"01001038",
+'むさし村山':"01001039",
+'湘南平塚':"01001040",
+'名取':"01001041",
+'大高':"01001042",
+'愛知東郷':"01001043",
+'太田':"01001044",
+'水戸内原':"01001045",
+'EXPOCITY':"01001046",
+'川崎':"01001047",
+'新三郷':"01001048",
+'幕張新都心':"01001049",
+'各務原':"01001050",
+'堺':"01001051",
+'四條畷':'01001052',
+'高崎(24.04)':'01001053',
+
+
+}
